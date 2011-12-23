@@ -21,3 +21,12 @@ func ParseAPRSMessage(i string) APRSMessage {
 		Dest: pathparts[0], Path: pathparts[1:],
 		Comment: parts[1]}
 }
+
+func (m *APRSMessage) ToString() (rv string) {
+	rv = strings.Join([]string{m.Source, m.Dest}, ">")
+	if len(m.Path) > 0 {
+		rv = strings.Join(append([]string{rv}, m.Path...), ",")
+	}
+	rv = strings.Join([]string{rv, m.Comment}, ":")
+	return rv
+}
