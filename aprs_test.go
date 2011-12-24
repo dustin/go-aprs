@@ -1,9 +1,9 @@
 package aprs
 
 import (
-	"encoding/json";
-	"os";
-	"testing";
+	"encoding/json"
+	"os"
+	"testing"
 )
 
 const CHRISTMAS_MSG string = "KG6HWF>APX200,WIDE1-1,WIDE2-1:=3722.1 N/12159.1 W-Merry Christmas!"
@@ -32,9 +32,9 @@ func TestAPRS(t *testing.T) {
 }
 
 type SampleDoc struct {
-	Src string `json:"src"`
+	Src    string                 `json:"src"`
 	Result map[string]interface{} `Json:"result"`
-	Failed int `json:"failed"`
+	Failed int                    `json:"failed"`
 }
 
 func TestFAP(t *testing.T) {
@@ -47,7 +47,7 @@ func TestFAP(t *testing.T) {
 	jd.Decode(&samples)
 	t.Logf("Found %d messages", len(samples))
 
-	for _, sample := range(samples) {
+	for _, sample := range samples {
 		if sample.Failed != 1 {
 			v := ParseAPRSMessage(sample.Src)
 			assert(t, "Source", v.Source, sample.Result["srccallsign"])

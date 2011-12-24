@@ -21,7 +21,7 @@ func ParseAPRSMessage(i string) APRSMessage {
 
 	return APRSMessage{Original: i,
 		Source: srcparts[0],
-		Dest: pathparts[0], Path: pathparts[1:],
+		Dest:   pathparts[0], Path: pathparts[1:],
 		Body: parts[1]}
 }
 
