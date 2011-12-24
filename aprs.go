@@ -1,6 +1,7 @@
 package aprs
 
 import (
+	"bytes"
 	"strings"
 )
 
@@ -24,11 +25,15 @@ func ParseAPRSMessage(i string) APRSMessage {
 		Body: parts[1]}
 }
 
-func (m *APRSMessage) ToString() (rv string) {
-	rv = strings.Join([]string{m.Source, m.Dest}, ">")
+func (m *APRSMessage) ToString() string {
+	b := bytes.NewBufferString(m.Source)
+	b.WriteByte('>')
+	b.WriteString(m.Dest)
 	if len(m.Path) > 0 {
-		rv = strings.Join(append([]string{rv}, m.Path...), ",")
+		b.WriteByte(',')
+		b.WriteString(strings.Join(m.Path, ","))
 	}
-	rv = strings.Join([]string{rv, m.Body}, ":")
-	return rv
+	b.WriteByte(':')
+	b.WriteString(m.Body)
+	return b.String()
 }
