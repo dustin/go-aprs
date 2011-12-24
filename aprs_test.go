@@ -28,7 +28,7 @@ func TestAPRS(t *testing.T) {
 	assert(t, "Path[1]", v.Path[1], "WIDE2-1")
 	assert(t, "Body", v.Body, "=3722.1 N/12159.1 W-Merry Christmas!")
 
-	assert(t, "ToString()", v.ToString(), CHRISTMAS_MSG)
+	assert(t, "String()", v.String(), CHRISTMAS_MSG)
 }
 
 type SampleDoc struct {

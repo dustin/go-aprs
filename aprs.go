@@ -25,7 +25,7 @@ func ParseAPRSMessage(i string) APRSMessage {
 		Body: parts[1]}
 }
 
-func (m *APRSMessage) ToString() string {
+func (m *APRSMessage) String() string {
 	b := bytes.NewBufferString(m.Source)
 	b.WriteByte('>')
 	b.WriteString(m.Dest)
