@@ -5,10 +5,11 @@ import (
 )
 
 type APRSMessage struct {
-	Source  string
-	Dest    string
-	Path    []string
-	Comment string
+	Original string
+	Source   string
+	Dest     string
+	Path     []string
+	Body     string
 }
 
 func ParseAPRSMessage(i string) APRSMessage {
@@ -17,9 +18,10 @@ func ParseAPRSMessage(i string) APRSMessage {
 	srcparts := strings.SplitN(parts[0], ">", 2)
 	pathparts := strings.Split(srcparts[1], ",")
 
-	return APRSMessage{Source: srcparts[0],
+	return APRSMessage{Original: i,
+		Source: srcparts[0],
 		Dest: pathparts[0], Path: pathparts[1:],
-		Comment: parts[1]}
+		Body: parts[1]}
 }
 
 func (m *APRSMessage) ToString() (rv string) {
@@ -27,6 +29,6 @@ func (m *APRSMessage) ToString() (rv string) {
 	if len(m.Path) > 0 {
 		rv = strings.Join(append([]string{rv}, m.Path...), ",")
 	}
-	rv = strings.Join([]string{rv, m.Comment}, ":")
+	rv = strings.Join([]string{rv, m.Body}, ":")
 	return rv
 }
