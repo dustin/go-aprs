@@ -25,17 +25,25 @@ var NoPositionFound = errors.New("No Positions Found")
 
 type MsgBody string
 
+type Symbol struct {
+	Table  byte
+	Symbol byte
+}
+
+func (s Symbol) String() string {
+	return fmt.Sprintf("{%c %c}", s.Table, s.Symbol)
+}
+
 type Position struct {
 	Lat       float64
 	Lon       float64
 	Ambiguity int
-	Table     byte
-	Symbol    byte
+	Symbol    Symbol
 }
 
 func (p Position) String() string {
-	return fmt.Sprintf("{lat=%v, lon=%v, amb=%v, tbl=%v, sym=%v}",
-		p.Lat, p.Lon, p.Ambiguity, p.Table, p.Symbol)
+	return fmt.Sprintf("{lat=%v, lon=%v, amb=%v, sym=%v}",
+		p.Lat, p.Lon, p.Ambiguity, p.Symbol)
 }
 
 type APRSMessage struct {
@@ -52,8 +60,8 @@ func positionUncompressed(input string) (pos Position, err error) {
 	if len(found) == 0 || len(found[0]) != 12 {
 		return pos, NoPositionFound
 	}
-	pos.Table = found[0][6][0]
-	pos.Symbol = found[0][11][0]
+	pos.Symbol.Table = found[0][6][0]
+	pos.Symbol.Symbol = found[0][11][0]
 	nums := []float64{0, 0, 0, 0}
 	toparse := []string{found[0][2], found[0][3] + "." + found[0][4],
 		found[0][7], found[0][8] + "." + found[0][9]}

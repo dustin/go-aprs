@@ -18,9 +18,9 @@ type sample struct {
 
 var samples = []sample{
 	sample{`K6LRG-C>APJI23,WIDE1-1,WIDE2-1:!3729.98ND12152.33W&RNG0060 2m Voice 145.070 +1.495 Mhz`,
-		Position{37.49966666666667, -121.87216666666667, 0, 'D', '&'}},
+		Position{37.49966666666667, -121.87216666666667, 0, Symbol{'D', '&'}}},
 	sample{`K7FED-1>APNX01,qAR,W6MSU-7:!3739.12N112132.05W#PHG5750 W1, K7FED FILL-IN LLNL S300`,
-		Position{37.652, -121.534167, 0, '1', '#'}},
+		Position{37.652, -121.534167, 0, Symbol{'1', '#'}}},
 }
 
 func assert(t *testing.T, name string, got interface{}, expected interface{}) {
@@ -54,8 +54,8 @@ func TestAPRS(t *testing.T) {
 	assertEpsilon(t, "lat", 37.3691667, pos.Lat)
 	assertEpsilon(t, "lon", -121.985833, pos.Lon)
 	assert(t, "ambiguity", 1, pos.Ambiguity)
-	assert(t, "table", byte('/'), pos.Table)
-	assert(t, "symbol", byte('-'), pos.Symbol)
+	assert(t, "table", byte('/'), pos.Symbol.Table)
+	assert(t, "symbol", byte('-'), pos.Symbol.Symbol)
 
 	assert(t, "String()", v.String(), CHRISTMAS_MSG)
 }
@@ -70,8 +70,8 @@ func TestSamples(t *testing.T) {
 		assertEpsilon(t, "lat", s.expected.Lat, pos.Lat)
 		assertEpsilon(t, "lon", s.expected.Lon, pos.Lon)
 		assert(t, "ambiguity", s.expected.Ambiguity, pos.Ambiguity)
-		assert(t, "table", s.expected.Table, pos.Table)
-		assert(t, "symbol", s.expected.Symbol, pos.Symbol)
+		assert(t, "table", s.expected.Symbol.Table, pos.Symbol.Table)
+		assert(t, "symbol", s.expected.Symbol.Symbol, pos.Symbol.Symbol)
 	}
 }
 
@@ -93,14 +93,14 @@ func assertLatLon(t *testing.T, pos Position, doc SampleDoc) {
 			doc.Src, pos, slat, slon)
 	}
 	tbl := doc.Result["symboltable"].(string)[0]
-	if pos.Table != tbl {
+	if pos.Symbol.Table != tbl {
 		t.Fatalf("Expected symbol table %v, got %v for %v",
-			tbl, pos.Table, doc.Src)
+			tbl, pos.Symbol.Table, doc.Src)
 	}
 	symbol := doc.Result["symbolcode"].(string)[0]
-	if pos.Symbol != symbol {
+	if pos.Symbol.Symbol != symbol {
 		t.Fatalf("Expected symbol %v, got %v for %v",
-			symbol, pos.Symbol, doc.Src)
+			symbol, pos.Symbol.Symbol, doc.Src)
 	}
 }
 
