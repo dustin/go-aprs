@@ -9,6 +9,8 @@ import (
 
 const CHRISTMAS_MSG string = "KG6HWF>APX200,WIDE1-1,WIDE2-1:=3722.1 N/12159.1 W-Merry Christmas!"
 
+const SAMPLE1 = `K6LRG-C>APJI23,WIDE1-1,WIDE2-1:!3729.98ND12152.33W&RNG0060 2m Voice 145.070 +1.495 Mhz`
+
 type aprsTest struct {
 	in string
 }
@@ -45,6 +47,20 @@ func TestAPRS(t *testing.T) {
 	assertEpsilon(t, "lon", -121.985, pos.Lon)
 
 	assert(t, "String()", v.String(), CHRISTMAS_MSG)
+}
+
+func TestSample1Loc(t *testing.T) {
+	v := ParseAPRSMessage(SAMPLE1)
+	assert(t, "Source", v.Source, "K6LRG-C")
+	assert(t, "Dest", v.Dest, "APJI23")
+
+	pos, err := v.Body.Position()
+	if err != nil {
+		t.Fatalf("Couldn't parse body position:  %v", err)
+	}
+
+	assertEpsilon(t, "lat", 37.49966666666667, pos.Lat)
+	assertEpsilon(t, "lon", -121.87216666666667, pos.Lon)
 }
 
 type SampleDoc struct {
