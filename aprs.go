@@ -3,6 +3,7 @@ package aprs
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -22,6 +23,15 @@ var NoPositionFound = errors.New("No Positions Found")
 
 type MsgBody string
 
+type Position struct {
+	Lat float64
+	Lon float64
+}
+
+func (p Position) String() string {
+	return fmt.Sprintf("{lat=%v, lon=%v}", p.Lat, p.Lon)
+}
+
 type APRSMessage struct {
 	Original string
 	Source   string
@@ -30,11 +40,11 @@ type APRSMessage struct {
 	Body     MsgBody
 }
 
-func positionUncompressed(input string) (lat, lon float64, err error) {
+func positionUncompressed(input string) (pos Position, err error) {
 	found := uncompressedPositionRegexp.FindAllStringSubmatch(input, 10)
 	// {"3722.1 N/12159.1 W", "37", "22", "1", "N", "121", "59", "1", "W"}
 	if len(found) == 0 || len(found[0]) != 10 {
-		return 0, 0, NoPositionFound
+		return pos, NoPositionFound
 	}
 	nums := []float64{0, 0, 0, 0}
 	toparse := []string{found[0][2], found[0][3] + "." + found[0][4],
@@ -42,7 +52,7 @@ func positionUncompressed(input string) (lat, lon float64, err error) {
 	for i, p := range toparse {
 		n, err := strconv.ParseFloat(p, 64)
 		if err != nil {
-			return 0, 0, err
+			return pos, err
 		}
 		nums[i] = n
 	}
@@ -58,11 +68,11 @@ func positionUncompressed(input string) (lat, lon float64, err error) {
 	}
 
 	if found[0][5] == "N" || found[0][5] == "S" {
-		lat = a
-		lon = b
+		pos.Lat = a
+		pos.Lon = b
 	} else {
-		lat = b
-		lon = a
+		pos.Lat = b
+		pos.Lon = a
 	}
 
 	// log.Printf("uncomp matched %#v -> %v,%v", found, lat, lon)
@@ -78,31 +88,31 @@ func decodeBase91(s []byte) int {
 		(int(s[2]-33) * 91) + int(s[3]) - 33
 }
 
-func positionCompressed(input string) (lat, lon float64, err error) {
+func positionCompressed(input string) (pos Position, err error) {
 	found := compressedPositionRegexp.FindAllStringSubmatch(input, 10)
 	// {"/]\"4-}Foo !w6", "/", "]\"4-", "}Foo", " ", "!w", "6"}}
 	if len(found) == 0 || len(found[0]) != 7 {
-		return 0, 0, NoPositionFound
+		return pos, NoPositionFound
 	}
 
 	// Lat = 90 - ((y1-33) x 91^3 + (y2-33) x 91^2 + (y3-33) x 91 + y4-33) / 380926
 	// Long = -180 + ((x1-33) x 91^3 + (x2-33) x 91^2 + (x3-33) x 91 + x4-33) / 190463
 
-	lat = 90 - float64(decodeBase91([]byte(found[0][2])))/380926
-	lon = -180 + float64(decodeBase91([]byte(found[0][3])))/190463
+	pos.Lat = 90 - float64(decodeBase91([]byte(found[0][2])))/380926
+	pos.Lon = -180 + float64(decodeBase91([]byte(found[0][3])))/190463
 
 	// log.Printf("comp matched %#v (%v)-> %v,%v", found, found[0][4], lat, lon)
 
-	return lat, lon, nil
+	return pos, nil
 }
 
 // Get the position of the message.
-func (body MsgBody) Position() (lat float64, lon float64, err error) {
-	lat, lon, err = positionUncompressed(string(body))
+func (body MsgBody) Position() (pos Position, err error) {
+	pos, err = positionUncompressed(string(body))
 	if err == nil {
 		return
 	}
-	lat, lon, err = positionCompressed(string(body))
+	pos, err = positionCompressed(string(body))
 	return
 }
 

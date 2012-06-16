@@ -36,13 +36,13 @@ func TestAPRS(t *testing.T) {
 	assert(t, "Path[1]", v.Path[1], "WIDE2-1")
 	assert(t, "Body", string(v.Body), "=3722.1 N/12159.1 W-Merry Christmas!")
 
-	lat, lon, err := v.Body.Position()
+	pos, err := v.Body.Position()
 	if err != nil {
 		t.Fatalf("Couldn't parse body position:  %v", err)
 	}
 
-	assertEpsilon(t, "lat", 37.368333333333, lat)
-	assertEpsilon(t, "lon", -121.985, lon)
+	assertEpsilon(t, "lat", 37.368333333333, pos.Lat)
+	assertEpsilon(t, "lon", -121.985, pos.Lon)
 
 	assert(t, "String()", v.String(), CHRISTMAS_MSG)
 }
@@ -54,28 +54,28 @@ type SampleDoc struct {
 	Misunderstood bool
 }
 
-func assertLatLon(t *testing.T, lat, lon float64, doc SampleDoc) {
+func assertLatLon(t *testing.T, pos Position, doc SampleDoc) {
 	slat, haslat := doc.Result["latitude"].(float64)
 	slon, haslon := doc.Result["longitude"].(float64)
 	if !(haslat && haslon) {
 		return
 	}
-	if math.Abs(lat-slat) > 0.001 || math.Abs(lon-slon) > 0.001 {
-		t.Fatalf("Error parsing lat/lon from %v, got %v,%v; expected %v,%v",
-			doc.Src, lat, lon, slat, slon)
+	if math.Abs(pos.Lat-slat) > 0.001 || math.Abs(pos.Lon-slon) > 0.001 {
+		t.Fatalf("Error parsing lat/lon from %v, got %v; expected %v,%v",
+			doc.Src, pos, slat, slon)
 	}
 
 }
 
-func negAssertLatLon(t *testing.T, lat, lon float64, doc SampleDoc) {
+func negAssertLatLon(t *testing.T, pos Position, doc SampleDoc) {
 	slat, haslat := doc.Result["latitude"].(float64)
 	slon, haslon := doc.Result["longitude"].(float64)
 	if !(haslat && haslon) {
 		return
 	}
-	if !(math.Abs(lat-slat) > 0.001 || math.Abs(lon-slon) > 0.001) {
-		t.Fatalf("Expected to fail parsing lat/lon from %v, got %v,%v; expected %v,%v",
-			doc.Src, lat, lon, slat, slon)
+	if !(math.Abs(pos.Lat-slat) > 0.001 || math.Abs(pos.Lon-slon) > 0.001) {
+		t.Fatalf("Expected to fail parsing lat/lon from %v, got %v; expected %v,%v",
+			doc.Src, pos, slat, slon)
 	}
 }
 
@@ -106,14 +106,14 @@ func TestFAP(t *testing.T) {
 
 			if sample.Misunderstood {
 				misunderstood++
-				lat, lon, err := v.Body.Position()
+				pos, err := v.Body.Position()
 				if err == nil {
-					negAssertLatLon(t, lat, lon, sample)
+					negAssertLatLon(t, pos, sample)
 				}
 			} else {
-				lat, lon, err := v.Body.Position()
+				pos, err := v.Body.Position()
 				if err == nil {
-					assertLatLon(t, lat, lon, sample)
+					assertLatLon(t, pos, sample)
 					positions++
 				}
 			}

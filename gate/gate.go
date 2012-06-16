@@ -51,10 +51,10 @@ func main() {
 			log.Printf("info: %s", line)
 		} else {
 			msg := aprs.ParseAPRSMessage(line)
-			lat, lon, err := msg.Body.Position()
+			pos, err := msg.Body.Position()
 			if err == nil {
-				log.Printf("%s said to %s:  ``%s'' at %v,%v",
-					msg.Source, msg.Dest, msg.Body, lat, lon)
+				log.Printf("%s said to %s:  ``%s'' at %v",
+					msg.Source, msg.Dest, msg.Body, pos)
 			} else {
 				log.Printf("%s said to %s:  ``%s''", msg.Source, msg.Dest, msg.Body)
 			}
