@@ -96,7 +96,7 @@ func negAssertLatLon(t *testing.T, pos Position, doc SampleDoc) {
 }
 
 func TestFAP(t *testing.T) {
-	minSuccess := 18
+	minSuccess := 20
 
 	var samples []SampleDoc
 	r, err := os.Open("sample.json")

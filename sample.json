@@ -77,8 +77,7 @@
          "type" : "location",
          "daodatumbyte" : "W",
          "header" : "G4EUM-9>APOTC1,G4EUM*,WIDE2-2,qAS,M3SXA-10"
-      },
-       "misunderstood": true
+      }
    },
    {
       "src" : "G4EUM-9>APOTC1,G4EUM*,WIDE2-2,qAS,M3SXA-10:/055816h5134.38N/00019.47W>155/023!W26!/A=000188 14.3V 27C HDOP01.0 SATS09",
@@ -121,8 +120,7 @@
          "type" : "location",
          "daodatumbyte" : "W",
          "header" : "G4EUM-9>APOTC1,G4EUM*,WIDE2-2,qAS,M3SXA-10"
-      },
-       "misunderstood": true
+      }
    },
    {
       "src" : "G4EUM-9>APOTC1,G4EUM*,WIDE2-2,qAS,M3SXA-10:/060642/5134.38N/00019.47W>155/023!W26!/A=000188 14.3V 27C HDOP01.0 SATS09",

@@ -14,7 +14,7 @@ const b91chars = "[!\"#$%&'()*+,-./0123456789:;<=>?@" +
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`" +
 	"abcdefghijklmnopqrstuvwxyz{']"
 
-var uncompressedPositionRegexp = regexp.MustCompile(`([!=]|[/@]\d{6}[z/])` +
+var uncompressedPositionRegexp = regexp.MustCompile(`([!=]|[/@]\d{6}[hz/])` +
 	coordField + "[/D]" + coordField)
 var compressedPositionRegexp = regexp.MustCompile("([!=/@])(" +
 	b91chars + "{4})(" + b91chars + "{4})(.)(..)(.)")
