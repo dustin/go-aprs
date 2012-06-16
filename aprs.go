@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-const coordField = `(\d{1,3})([0-5][0-9])\.(\d+)\s*([NEWS])`
+const coordField = `(\d{1,3})([0-5 ][0-9 ])\.([0-9 ]+)([NEWS])`
 const b91chars = "[!\"#$%&'()*+,-./0123456789:;<=>?@" +
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`" +
 	"abcdefghijklmnopqrstuvwxyz{']"
@@ -24,12 +24,13 @@ var NoPositionFound = errors.New("No Positions Found")
 type MsgBody string
 
 type Position struct {
-	Lat float64
-	Lon float64
+	Lat       float64
+	Lon       float64
+	Ambiguity int
 }
 
 func (p Position) String() string {
-	return fmt.Sprintf("{lat=%v, lon=%v}", p.Lat, p.Lon)
+	return fmt.Sprintf("{lat=%v, lon=%v, amb=%v}", p.Lat, p.Lon, p.Ambiguity)
 }
 
 type APRSMessage struct {
@@ -50,7 +51,15 @@ func positionUncompressed(input string) (pos Position, err error) {
 	toparse := []string{found[0][2], found[0][3] + "." + found[0][4],
 		found[0][6], found[0][7] + "." + found[0][8]}
 	for i, p := range toparse {
-		n, err := strconv.ParseFloat(p, 64)
+		converted := strings.Map(func(r rune) (rv rune) {
+			rv = r
+			if r == ' ' {
+				pos.Ambiguity++
+				rv = '0'
+			}
+			return
+		}, p)
+		n, err := strconv.ParseFloat(converted, 64)
 		if err != nil {
 			return pos, err
 		}
@@ -59,6 +68,32 @@ func positionUncompressed(input string) (pos Position, err error) {
 
 	a := nums[0] + (nums[1] / 60)
 	b := nums[2] + (nums[3] / 60)
+
+	pos.Ambiguity /= 2
+	offby := 0.0
+	switch pos.Ambiguity {
+	case 0:
+		// This is exact
+	case 1:
+		// Nearest 1/10 of a minute
+		offby = 0.05 / 60.0
+	case 2:
+		// Nearest minute
+		offby = 0.5 / 60.0
+	case 3:
+		// Nearest 10 minutes
+		offby = 5.0 / 60.0
+	case 4:
+		// Nearest degree
+		offby = 0.5
+	default:
+		return pos, fmt.Errorf("Invalid position ambiguity %d from %v",
+			pos.Ambiguity, found[0][0])
+	}
+	if offby > 0 {
+		a += offby
+		b += offby
+	}
 
 	if found[0][5] == "S" || found[0][5] == "W" {
 		a = 0 - a
@@ -75,7 +110,7 @@ func positionUncompressed(input string) (pos Position, err error) {
 		pos.Lon = a
 	}
 
-	// log.Printf("uncomp matched %#v -> %v,%v", found, lat, lon)
+	// log.Printf("uncomp matched %#v -> %v", found, pos)
 
 	return
 }

@@ -744,8 +744,7 @@
          "posambiguity" : 4,
          "type" : "location",
          "header" : "OH2RDP-1>BEACON-15,OH2RDG*,WIDE"
-      },
-       "misunderstood": true
+      }
    },
    {
       "src" : "OH2RDP-1>BEACON-15,OH2RDG*,WIDE:!602 .  S/0250 .  W#PHG7220RELAY,WIDE, OH2AP Jarvenpaa",
@@ -776,8 +775,7 @@
          "posambiguity" : 3,
          "type" : "location",
          "header" : "OH2RDP-1>BEACON-15,OH2RDG*,WIDE"
-      },
-       "misunderstood": true
+      }
    },
    {
       "src" : "OH2RDP-1>BEACON-15,OH2RDG*,WIDE:!6028.51N/02505.68E#PHG7220   RELAY,WIDE, OH2AP Jarvenpaa  \t ",

@@ -23,7 +23,7 @@ func assert(t *testing.T, name string, got interface{}, expected interface{}) {
 }
 
 func assertEpsilon(t *testing.T, field string, expected, got float64) {
-	if math.Abs(got-expected) > 0.001 {
+	if math.Abs(got-expected) > 0.0001 {
 		t.Fatalf("Expected %v for %v, got %v -- of by %v",
 			expected, field, got, math.Abs(got-expected))
 	}
@@ -43,8 +43,8 @@ func TestAPRS(t *testing.T) {
 		t.Fatalf("Couldn't parse body position:  %v", err)
 	}
 
-	assertEpsilon(t, "lat", 37.368333333333, pos.Lat)
-	assertEpsilon(t, "lon", -121.985, pos.Lon)
+	assertEpsilon(t, "lat", 37.3691667, pos.Lat)
+	assertEpsilon(t, "lon", -121.985833, pos.Lon)
 
 	assert(t, "String()", v.String(), CHRISTMAS_MSG)
 }
@@ -96,7 +96,7 @@ func negAssertLatLon(t *testing.T, pos Position, doc SampleDoc) {
 }
 
 func TestFAP(t *testing.T) {
-	expSuccess := 22
+	expSuccess := 24
 
 	var samples []SampleDoc
 	r, err := os.Open("sample.json")
