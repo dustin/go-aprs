@@ -9,7 +9,9 @@ import (
 )
 
 const coordField = `(\d{1,3})([0-5][0-9])\.(\d+)\s*([NEWS])`
-const b91chars = "."
+const b91chars = "[!\"#$%&'()*+,-./0123456789:;<=>?@" +
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`" +
+	"abcdefghijklmnopqrstuvwxyz{']"
 
 var uncompressedPositionRegexp = regexp.MustCompile(`([!=]|[/@]\d{6}[z/])` +
 	coordField + "/" + coordField)
