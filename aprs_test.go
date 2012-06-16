@@ -21,6 +21,8 @@ var samples = []sample{
 		Position{37.49966666666667, -121.87216666666667, 0, Symbol{'D', '&'}}},
 	sample{`K7FED-1>APNX01,qAR,W6MSU-7:!3739.12N112132.05W#PHG5750 W1, K7FED FILL-IN LLNL S300`,
 		Position{37.652, -121.534167, 0, Symbol{'1', '#'}}},
+	sample{`WINLINK>APWL2K,TCPIP*,qAC,T2LAX:;KE6AFE-10*160752z3658.  NW12202.  Wa144.910MHz 1200 R6m Public Winlink Gateway`,
+		Position{36.975, -122.0416666, 2, Symbol{'W', 'a'}}},
 }
 
 func assert(t *testing.T, name string, got interface{}, expected interface{}) {
@@ -67,11 +69,11 @@ func TestSamples(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Error getting position from %v: %v", s.src, err)
 		}
-		assertEpsilon(t, "lat", s.expected.Lat, pos.Lat)
-		assertEpsilon(t, "lon", s.expected.Lon, pos.Lon)
 		assert(t, "ambiguity", s.expected.Ambiguity, pos.Ambiguity)
 		assert(t, "table", s.expected.Symbol.Table, pos.Symbol.Table)
 		assert(t, "symbol", s.expected.Symbol.Symbol, pos.Symbol.Symbol)
+		assertEpsilon(t, "lat", s.expected.Lat, pos.Lat)
+		assertEpsilon(t, "lon", s.expected.Lon, pos.Lon)
 	}
 }
 

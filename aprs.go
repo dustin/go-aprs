@@ -16,7 +16,7 @@ const b91chars = "[!\"#$%&'()*+,-./0123456789:;<=>?@" +
 
 const symbolTables = `[0-9/\\A-z]`
 
-var uncompressedPositionRegexp = regexp.MustCompile(`([!=]|[/@]\d{6}[hz/])` +
+var uncompressedPositionRegexp = regexp.MustCompile(`([!=]|[/@\*]\d{6}[hz/])` +
 	coordField + "(" + symbolTables + ")" + coordField + "(.)")
 var compressedPositionRegexp = regexp.MustCompile("([!=/@])(" +
 	b91chars + "{4})(" + b91chars + "{4})(.)(..)(.)")
