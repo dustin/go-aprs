@@ -126,6 +126,7 @@ func TestFAP(t *testing.T) {
 				if err == nil {
 					negAssertLatLon(t, pos, sample)
 				}
+				t.Logf("Misunderstood:  %s", sample.Src)
 			} else {
 				pos, err := v.Body.Position()
 				if err == nil {
