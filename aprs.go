@@ -9,9 +9,12 @@ import (
 )
 
 const coordField = `(\d{1,3})([0-5][0-9])\.(\d+)\s*([NEWS])`
+const b91chars = "."
 
-var uncompressedPositionRegexp = regexp.MustCompile(`([!=]|[/@]\d{6}[z/])` + coordField + "/" + coordField)
-var compressedPositionRegexp = regexp.MustCompile("([!=/@])(.{4})(.{4})(.)(..)(.)")
+var uncompressedPositionRegexp = regexp.MustCompile(`([!=]|[/@]\d{6}[z/])` +
+	coordField + "/" + coordField)
+var compressedPositionRegexp = regexp.MustCompile("([!=/@])(" +
+	b91chars + "{4})(" + b91chars + "{4})(.)(..)(.)")
 
 var NoPositionFound = errors.New("No Positions Found")
 
@@ -86,7 +89,7 @@ func positionCompressed(input string) (lat, lon float64, err error) {
 	lat = 90 - float64(decodeBase91([]byte(found[0][2])))/380926
 	lon = -180 + float64(decodeBase91([]byte(found[0][3])))/190463
 
-	// log.Printf("comp matched %#v -> %v,%v", found, lat, lon)
+	// log.Printf("comp matched %#v (%v)-> %v,%v", found, found[0][4], lat, lon)
 
 	return lat, lon, nil
 }

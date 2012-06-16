@@ -67,7 +67,21 @@ func assertLatLon(t *testing.T, lat, lon float64, doc SampleDoc) {
 
 }
 
+func negAssertLatLon(t *testing.T, lat, lon float64, doc SampleDoc) {
+	slat, haslat := doc.Result["latitude"].(float64)
+	slon, haslon := doc.Result["longitude"].(float64)
+	if !(haslat && haslon) {
+		return
+	}
+	if !(math.Abs(lat-slat) > 0.001 || math.Abs(lon-slon) > 0.001) {
+		t.Fatalf("Expected to fail parsing lat/lon from %v, got %v,%v; expected %v,%v",
+			doc.Src, lat, lon, slat, slon)
+	}
+}
+
 func TestFAP(t *testing.T) {
+	minSuccess := 18
+
 	var samples []SampleDoc
 	r, err := os.Open("sample.json")
 	if err != nil {
@@ -92,6 +106,10 @@ func TestFAP(t *testing.T) {
 
 			if sample.Misunderstood {
 				misunderstood++
+				lat, lon, err := v.Body.Position()
+				if err == nil {
+					negAssertLatLon(t, lat, lon, sample)
+				}
 			} else {
 				lat, lon, err := v.Body.Position()
 				if err == nil {
@@ -101,6 +119,11 @@ func TestFAP(t *testing.T) {
 			}
 
 		}
+	}
+
+	if positions < minSuccess {
+		t.Fatalf("Expected to pass at least %v position tests, got %v",
+			minSuccess, positions)
 	}
 
 	t.Logf("Found %v positions", positions)
