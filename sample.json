@@ -265,8 +265,7 @@
          "posambiguity" : 0,
          "type" : "location",
          "header" : "IQ3VQ>APD225,TCPIP*,qAI,IQ3VQ,THIRD,92E5A2B6,T2HUB1,200106F8020204020000000000000002,T2FINLAND"
-      },
-       "misunderstood": true
+      }
    },
    {
       "src" : "JH9YVX>APU25N,TCPIP*,qAC,T2TOKYO3:@011241z3558.58N/13629.67E_068/001g001t033r000p020P020b09860h98Oregon WMR100N Weather Station {UIV32N}",
@@ -394,8 +393,7 @@
          "type" : "location",
          "daodatumbyte" : "W",
          "header" : "K0ELR-15>APOT02,WIDE1-1,WIDE2-1,qAo,K0ELR"
-      },
-       "misunderstood": true
+      }
    },
    {
       "src" : "K6IFR_S>APJS10,TCPIP*,qAC,K6IFR-BS:;K6IFR B *250300z3351.79ND11626.40WaRNG0040 440 Voice 447.140 -5.00 Mhz",

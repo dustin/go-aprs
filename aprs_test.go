@@ -96,7 +96,7 @@ func negAssertLatLon(t *testing.T, pos Position, doc SampleDoc) {
 }
 
 func TestFAP(t *testing.T) {
-	minSuccess := 20
+	expSuccess := 22
 
 	var samples []SampleDoc
 	r, err := os.Open("sample.json")
@@ -138,9 +138,9 @@ func TestFAP(t *testing.T) {
 		}
 	}
 
-	if positions < minSuccess {
-		t.Fatalf("Expected to pass at least %v position tests, got %v",
-			minSuccess, positions)
+	if positions != expSuccess {
+		t.Fatalf("Expected to pass at %v position tests, got %v",
+			expSuccess, positions)
 	}
 
 	t.Logf("Found %v positions", positions)
