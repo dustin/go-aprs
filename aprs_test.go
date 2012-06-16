@@ -9,15 +9,23 @@ import (
 
 const CHRISTMAS_MSG string = "KG6HWF>APX200,WIDE1-1,WIDE2-1:=3722.1 N/12159.1 W-Merry Christmas!"
 
-const SAMPLE1 = `K6LRG-C>APJI23,WIDE1-1,WIDE2-1:!3729.98ND12152.33W&RNG0060 2m Voice 145.070 +1.495 Mhz`
+const SAMPLE2 = `K7FED-1>APNX01,qAR,W6MSU-7:!3739.12N112132.05W#PHG5750 W1, K7FED FILL-IN LLNL S300`
 
-type aprsTest struct {
-	in string
+type sample struct {
+	src      string
+	expected Position
+}
+
+var samples = []sample{
+	sample{`K6LRG-C>APJI23,WIDE1-1,WIDE2-1:!3729.98ND12152.33W&RNG0060 2m Voice 145.070 +1.495 Mhz`,
+		Position{37.49966666666667, -121.87216666666667, 0, 'D', '&'}},
+	sample{`K7FED-1>APNX01,qAR,W6MSU-7:!3739.12N112132.05W#PHG5750 W1, K7FED FILL-IN LLNL S300`,
+		Position{37.652, -121.534167, 0, '1', '#'}},
 }
 
 func assert(t *testing.T, name string, got interface{}, expected interface{}) {
 	if got != expected {
-		t.Fatalf("Expected %s for %s, got %s", expected, name, got)
+		t.Fatalf("Expected %v for %v, got %v", expected, name, got)
 	}
 	// t.Logf("Looks like %s was %s", name, expected)
 }
@@ -45,22 +53,26 @@ func TestAPRS(t *testing.T) {
 
 	assertEpsilon(t, "lat", 37.3691667, pos.Lat)
 	assertEpsilon(t, "lon", -121.985833, pos.Lon)
+	assert(t, "ambiguity", 1, pos.Ambiguity)
+	assert(t, "table", byte('/'), pos.Table)
+	assert(t, "symbol", byte('-'), pos.Symbol)
 
 	assert(t, "String()", v.String(), CHRISTMAS_MSG)
 }
 
-func TestSample1Loc(t *testing.T) {
-	v := ParseAPRSMessage(SAMPLE1)
-	assert(t, "Source", v.Source, "K6LRG-C")
-	assert(t, "Dest", v.Dest, "APJI23")
-
-	pos, err := v.Body.Position()
-	if err != nil {
-		t.Fatalf("Couldn't parse body position:  %v", err)
+func TestSamples(t *testing.T) {
+	for _, s := range samples {
+		v := ParseAPRSMessage(s.src)
+		pos, err := v.Body.Position()
+		if err != nil {
+			t.Fatalf("Error getting position from %v: %v", s.src, err)
+		}
+		assertEpsilon(t, "lat", s.expected.Lat, pos.Lat)
+		assertEpsilon(t, "lon", s.expected.Lon, pos.Lon)
+		assert(t, "ambiguity", s.expected.Ambiguity, pos.Ambiguity)
+		assert(t, "table", s.expected.Table, pos.Table)
+		assert(t, "symbol", s.expected.Symbol, pos.Symbol)
 	}
-
-	assertEpsilon(t, "lat", 37.49966666666667, pos.Lat)
-	assertEpsilon(t, "lon", -121.87216666666667, pos.Lon)
 }
 
 type SampleDoc struct {
