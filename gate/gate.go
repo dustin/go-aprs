@@ -51,6 +51,7 @@ func main() {
 			log.Printf("info: %s", line)
 		} else {
 			msg := aprs.ParseAPRSMessage(line)
+			log.Printf("Raw:  %s", line)
 			pos, err := msg.Body.Position()
 			if err == nil {
 				log.Printf("%s said to %s:  ``%s'' at %v",
