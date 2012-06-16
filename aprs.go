@@ -14,8 +14,10 @@ const b91chars = "[!\"#$%&'()*+,-./0123456789:;<=>?@" +
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`" +
 	"abcdefghijklmnopqrstuvwxyz{']"
 
+const symbolTables = `[0-9/\\A-z]`
+
 var uncompressedPositionRegexp = regexp.MustCompile(`([!=]|[/@]\d{6}[hz/])` +
-	coordField + "[/DXI]" + coordField)
+	coordField + "(" + symbolTables + ")" + coordField + "(.)")
 var compressedPositionRegexp = regexp.MustCompile("([!=/@])(" +
 	b91chars + "{4})(" + b91chars + "{4})(.)(..)(.)")
 
@@ -27,10 +29,13 @@ type Position struct {
 	Lat       float64
 	Lon       float64
 	Ambiguity int
+	Table     byte
+	Symbol    byte
 }
 
 func (p Position) String() string {
-	return fmt.Sprintf("{lat=%v, lon=%v, amb=%v}", p.Lat, p.Lon, p.Ambiguity)
+	return fmt.Sprintf("{lat=%v, lon=%v, amb=%v, tbl=%v, sym=%v}",
+		p.Lat, p.Lon, p.Ambiguity, p.Table, p.Symbol)
 }
 
 type APRSMessage struct {
@@ -43,13 +48,15 @@ type APRSMessage struct {
 
 func positionUncompressed(input string) (pos Position, err error) {
 	found := uncompressedPositionRegexp.FindAllStringSubmatch(input, 10)
-	// {"3722.1 N/12159.1 W", "37", "22", "1", "N", "121", "59", "1", "W"}
-	if len(found) == 0 || len(found[0]) != 10 {
+	// {"=3722.1 N/12159.1 W-", "=", "37", "22", "1 ", "N", "/", "121", "59", "1 ", "W", "-"}
+	if len(found) == 0 || len(found[0]) != 12 {
 		return pos, NoPositionFound
 	}
+	pos.Table = found[0][6][0]
+	pos.Symbol = found[0][11][0]
 	nums := []float64{0, 0, 0, 0}
 	toparse := []string{found[0][2], found[0][3] + "." + found[0][4],
-		found[0][6], found[0][7] + "." + found[0][8]}
+		found[0][7], found[0][8] + "." + found[0][9]}
 	for i, p := range toparse {
 		converted := strings.Map(func(r rune) (rv rune) {
 			rv = r
@@ -98,7 +105,7 @@ func positionUncompressed(input string) (pos Position, err error) {
 	if found[0][5] == "S" || found[0][5] == "W" {
 		a = 0 - a
 	}
-	if found[0][9] == "W" || found[0][9] == "S" {
+	if found[0][10] == "W" || found[0][10] == "S" {
 		b = 0 - b
 	}
 

@@ -80,7 +80,16 @@ func assertLatLon(t *testing.T, pos Position, doc SampleDoc) {
 		t.Fatalf("Error parsing lat/lon from %v, got %v; expected %v,%v",
 			doc.Src, pos, slat, slon)
 	}
-
+	tbl := doc.Result["symboltable"].(string)[0]
+	if pos.Table != tbl {
+		t.Fatalf("Expected symbol table %v, got %v for %v",
+			tbl, pos.Table, doc.Src)
+	}
+	symbol := doc.Result["symbolcode"].(string)[0]
+	if pos.Symbol != symbol {
+		t.Fatalf("Expected symbol %v, got %v for %v",
+			symbol, pos.Symbol, doc.Src)
+	}
 }
 
 func negAssertLatLon(t *testing.T, pos Position, doc SampleDoc) {
