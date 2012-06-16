@@ -48,9 +48,10 @@ func TestAPRS(t *testing.T) {
 }
 
 type SampleDoc struct {
-	Src    string                 `json:"src"`
-	Result map[string]interface{} `Json:"result"`
-	Failed int                    `json:"failed"`
+	Src           string                 `json:"src"`
+	Result        map[string]interface{} `Json:"result"`
+	Failed        int                    `json:"failed"`
+	Misunderstood bool
 }
 
 func assertLatLon(t *testing.T, lat, lon float64, doc SampleDoc) {
@@ -79,6 +80,9 @@ func TestFAP(t *testing.T) {
 	}
 	t.Logf("Found %d messages", len(samples))
 
+	positions := 0
+	misunderstood := 0
+
 	for _, sample := range samples {
 		if sample.Failed != 1 {
 			v := ParseAPRSMessage(sample.Src)
@@ -86,11 +90,27 @@ func TestFAP(t *testing.T) {
 			assert(t, "Dest", v.Dest, sample.Result["dstcallsign"])
 			assert(t, "Body", string(v.Body), sample.Result["body"])
 
-			lat, lon, err := v.Body.Position()
-			if err == nil {
-				assertLatLon(t, lat, lon, sample)
+			if sample.Misunderstood {
+				misunderstood++
+			} else {
+				lat, lon, err := v.Body.Position()
+				if err == nil {
+					assertLatLon(t, lat, lon, sample)
+					positions++
+				}
 			}
 
 		}
+	}
+
+	t.Logf("Found %v positions", positions)
+	t.Logf("Misunderstood %v", misunderstood)
+}
+
+func TestDecodeBase91(t *testing.T) {
+	v := decodeBase91([]byte("<*e7"))
+	expected := 20346417 + 74529 + 6188 + 22
+	if v != expected {
+		t.Fatalf("Expected %v, got %v", expected, v)
 	}
 }

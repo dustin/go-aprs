@@ -77,7 +77,8 @@
          "type" : "location",
          "daodatumbyte" : "W",
          "header" : "G4EUM-9>APOTC1,G4EUM*,WIDE2-2,qAS,M3SXA-10"
-      }
+      },
+       "misunderstood": true
    },
    {
       "src" : "G4EUM-9>APOTC1,G4EUM*,WIDE2-2,qAS,M3SXA-10:/055816h5134.38N/00019.47W>155/023!W26!/A=000188 14.3V 27C HDOP01.0 SATS09",
@@ -120,7 +121,8 @@
          "type" : "location",
          "daodatumbyte" : "W",
          "header" : "G4EUM-9>APOTC1,G4EUM*,WIDE2-2,qAS,M3SXA-10"
-      }
+      },
+       "misunderstood": true
    },
    {
       "src" : "G4EUM-9>APOTC1,G4EUM*,WIDE2-2,qAS,M3SXA-10:/060642/5134.38N/00019.47W>155/023!W26!/A=000188 14.3V 27C HDOP01.0 SATS09",
@@ -265,7 +267,8 @@
          "posambiguity" : 0,
          "type" : "location",
          "header" : "IQ3VQ>APD225,TCPIP*,qAI,IQ3VQ,THIRD,92E5A2B6,T2HUB1,200106F8020204020000000000000002,T2FINLAND"
-      }
+      },
+       "misunderstood": true
    },
    {
       "src" : "JH9YVX>APU25N,TCPIP*,qAC,T2TOKYO3:@011241z3558.58N/13629.67E_068/001g001t033r000p020P020b09860h98Oregon WMR100N Weather Station {UIV32N}",
@@ -393,7 +396,8 @@
          "type" : "location",
          "daodatumbyte" : "W",
          "header" : "K0ELR-15>APOT02,WIDE1-1,WIDE2-1,qAo,K0ELR"
-      }
+      },
+       "misunderstood": true
    },
    {
       "src" : "K6IFR_S>APJS10,TCPIP*,qAC,K6IFR-BS:;K6IFR B *250300z3351.79ND11626.40WaRNG0040 440 Voice 447.140 -5.00 Mhz",
@@ -588,7 +592,8 @@
          "type" : "location",
          "daodatumbyte" : "W",
          "header" : "OH2JCQ-9>VP1U88,TRACE2-2,qAR,OH2RDK-5"
-      }
+      },
+       "misunderstood": true
    },
    {
       "src" : "OH2KKU-15>APRS,TCPIP*,qAC,FOURTH:!I0-X;T_Wv&{-Aigate testing",
@@ -623,7 +628,8 @@
          "messaging" : 0,
          "type" : "location",
          "header" : "OH2KKU-15>APRS,TCPIP*,qAC,FOURTH"
-      }
+      },
+       "misunderstood": true
    },
    {
       "src" : "OH2KKU-1>APRS,TCPIP*,qAC,FIRST:;SRAL HQ  *100927zS0%E/Th4_a  AKaupinmaenpolku9,open M-Th12-17,F12-14 lcl",
@@ -658,7 +664,8 @@
          "format" : "compressed",
          "type" : "object",
          "header" : "OH2KKU-1>APRS,TCPIP*,qAC,FIRST"
-      }
+      },
+       "misunderstood": true
    },
    {
       "src" : "OH2KKU-1>APRS,TCPIP*,qAC,FIRST:;SRAL HQ *110507zS0%E/Th4_a AKaupinmaenpolku9,open M-Th12-17,F12-14 lcl",
@@ -709,7 +716,8 @@
          "messaging" : 0,
          "type" : "location",
          "header" : "OH2LCQ-10>APZMDR,WIDE3-2,qAo,OH2MQK-1"
-      }
+      },
+       "misunderstood": true
    },
    {
       "src" : "OH2RDP-1>BEACON-15,OH2RDG*,WIDE:!60  .  S/025  .  W#PHG7220RELAY,WIDE, OH2AP Jarvenpaa",
@@ -740,7 +748,8 @@
          "posambiguity" : 4,
          "type" : "location",
          "header" : "OH2RDP-1>BEACON-15,OH2RDG*,WIDE"
-      }
+      },
+       "misunderstood": true
    },
    {
       "src" : "OH2RDP-1>BEACON-15,OH2RDG*,WIDE:!602 .  S/0250 .  W#PHG7220RELAY,WIDE, OH2AP Jarvenpaa",
@@ -771,7 +780,8 @@
          "posambiguity" : 3,
          "type" : "location",
          "header" : "OH2RDP-1>BEACON-15,OH2RDG*,WIDE"
-      }
+      },
+       "misunderstood": true
    },
    {
       "src" : "OH2RDP-1>BEACON-15,OH2RDG*,WIDE:!6028.51N/02505.68E#PHG7220   RELAY,WIDE, OH2AP Jarvenpaa  \t ",
@@ -8017,7 +8027,8 @@
          "posambiguity" : 0,
          "type" : "location",
          "header" : "OH7LZB-13>SX15S6,TCPIP*,qAC,FOURTH"
-      }
+      },
+       "misunderstood": true
    },
    {
       "src" : "OH7LZB-13>SX15S6,TCPIP*,qAC,FOURTH:'I',l \u001c>/ comment |!!!!|",
@@ -8063,7 +8074,8 @@
          "posambiguity" : 0,
          "type" : "location",
          "header" : "OH7LZB-13>SX15S6,TCPIP*,qAC,FOURTH"
-      }
+      },
+       "misunderstood": true
    },
    {
       "src" : "OH7LZB-13>SX15S6,TCPIP*,qAC,FOURTH:'I',l \u001c>/]",
@@ -8172,7 +8184,8 @@
          "type" : "location",
          "daodatumbyte" : "W",
          "header" : "OH7LZB-9>APZMDR,WIDE2-2,qAo,OH2RCH"
-      }
+      },
+       "misunderstood": true
    },
    {
       "src" : "OZ2BRN-4>5U2V08,OZ3RIN-3,OZ4DIA-2*,WIDE2-1,qAR,DB0KUE:`'O<l!{,,\"4R}",
@@ -8219,7 +8232,8 @@
          "posambiguity" : 0,
          "type" : "location",
          "header" : "OZ2BRN-4>5U2V08,WIDE2-1,qAo,OH7LZB"
-      }
+      },
+       "misunderstood": true
    },
    {
       "src" : "OZ2BRN-4>5U2V08,WIDE2-1,qAo,OH7LZB:`c51!f?>/‘102030FFff commeeeent",
@@ -8264,7 +8278,8 @@
          "posambiguity" : 0,
          "type" : "location",
          "header" : "OZ2BRN-4>5U2V08,WIDE2-1,qAo,OH7LZB"
-      }
+      },
+       "misunderstood": true
    },
    {
       "src" : "SR3DGT>APN391,SQ2LYH-14,SR4DOS,WIDE2*,qAo,SR4NWO-1:$ULTW00000000FFEA0000296F000A9663000103E80016025D",
@@ -8378,7 +8393,8 @@
          "messaging" : 1,
          "type" : "location",
          "header" : "SV4IKL-2>APU25N,WIDE2-2,qAR,SV6EXB-1"
-      }
+      },
+       "misunderstood": true
    },
    {
       "src" : "WC4PEM-14>APN391,WIDE2-1,qAo,K2KZ-3:$ULTW0053002D028D02FA2813000D87BD000103E8015703430010000C",
