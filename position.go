@@ -27,8 +27,30 @@ type Symbol struct {
 	Symbol byte
 }
 
-func (s Symbol) String() string {
-	return fmt.Sprintf("{%c %c}", s.Table, s.Symbol)
+func (s Symbol) IsPrimary() bool {
+	return s.Table != '\\'
+}
+
+func (s Symbol) Name() (rv string) {
+	m := primarySymbolMap
+	if !s.IsPrimary() {
+		m = alternateSymbolMap
+	}
+	return m[s.Symbol]
+}
+
+func (s Symbol) Glyph() string {
+	return symbolGlyphs[s.Name()]
+}
+
+func (s Symbol) String() (rv string) {
+	g := s.Glyph()
+	if g == "" {
+		rv = fmt.Sprintf("{%c%c} (%s)", s.Table, s.Symbol, s.Name())
+	} else {
+		rv = fmt.Sprintf("{%c%c} (%s -  %s )", s.Table, s.Symbol, s.Name(), g)
+	}
+	return
 }
 
 type Position struct {
