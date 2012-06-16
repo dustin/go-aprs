@@ -23,6 +23,8 @@ var samples = []sample{
 		Position{37.652, -121.534167, 0, Symbol{'1', '#'}}},
 	sample{`WINLINK>APWL2K,TCPIP*,qAC,T2LAX:;KE6AFE-10*160752z3658.  NW12202.  Wa144.910MHz 1200 R6m Public Winlink Gateway`,
 		Position{36.975, -122.0416666, 2, Symbol{'W', 'a'}}},
+	sample{`KE6AFE-13>APKH2Z,TCPIP*,qAC,CORE-2:;VP@CM86XX*162000z3658.94N/12200.86W? KE6AFE-13 8800`,
+		Position{36.9823333, -122.014333, 0, Symbol{'/', '?'}}},
 }
 
 func assert(t *testing.T, name string, got interface{}, expected interface{}) {
