@@ -16,7 +16,7 @@ const b91chars = "[!\"#$%&'()*+,-./0123456789:;<=>?@" +
 const symbolTables = `[0-9/\\A-z]`
 
 var uncompressedPositionRegexp = regexp.MustCompile(`([!=]|[/@\*]\d{6}[hz/])` +
-	coordField + "(" + symbolTables + ")" + coordField + "(.)")
+	coordField + "(" + symbolTables + ")" + coordField + "(.)([0-3][0-9]{2}/[0-9]{3})?")
 var compressedPositionRegexp = regexp.MustCompile("([!=/@])(" +
 	b91chars + "{4})(" + b91chars + "{4})(.)(..)(.)")
 
@@ -53,10 +53,16 @@ func (s Symbol) String() (rv string) {
 	return
 }
 
+type Velocity struct {
+	Course float64
+	Speed  float64
+}
+
 type Position struct {
 	Lat       float64
 	Lon       float64
 	Ambiguity int
+	Velocity  Velocity
 	Symbol    Symbol
 }
 
@@ -67,8 +73,8 @@ func (p Position) String() string {
 
 func positionUncompressed(input string) (pos Position, err error) {
 	found := uncompressedPositionRegexp.FindAllStringSubmatch(input, 10)
-	// {"=3722.1 N/12159.1 W-", "=", "37", "22", "1 ", "N", "/", "121", "59", "1 ", "W", "-"}
-	if len(found) == 0 || len(found[0]) != 12 {
+	// {"=3722.1 N/12159.1 W-", "=", "37", "22", "1 ", "N", "/", "121", "59", "1 ", "W", "-", ""}
+	if len(found) == 0 || len(found[0]) != 13 {
 		return pos, NoPositionFound
 	}
 	pos.Symbol.Table = found[0][6][0]
@@ -134,6 +140,12 @@ func positionUncompressed(input string) (pos Position, err error) {
 	} else {
 		pos.Lat = b
 		pos.Lon = a
+	}
+
+	if found[0][12] != "" && pos.Symbol.Symbol != '_' {
+		fmt.Sscanf(found[0][12], "%f/%f",
+			&pos.Velocity.Course, &pos.Velocity.Speed)
+		pos.Velocity.Speed *= 1.852
 	}
 
 	// log.Printf("uncomp matched %#v -> %v", found, pos)

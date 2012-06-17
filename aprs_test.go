@@ -18,13 +18,13 @@ type sample struct {
 
 var samples = []sample{
 	sample{`K6LRG-C>APJI23,WIDE1-1,WIDE2-1:!3729.98ND12152.33W&RNG0060 2m Voice 145.070 +1.495 Mhz`,
-		Position{37.49966666666667, -121.87216666666667, 0, Symbol{'D', '&'}}},
+		Position{37.49966666666667, -121.87216666666667, 0, Velocity{}, Symbol{'D', '&'}}},
 	sample{`K7FED-1>APNX01,qAR,W6MSU-7:!3739.12N112132.05W#PHG5750 W1, K7FED FILL-IN LLNL S300`,
-		Position{37.652, -121.534167, 0, Symbol{'1', '#'}}},
+		Position{37.652, -121.534167, 0, Velocity{}, Symbol{'1', '#'}}},
 	sample{`WINLINK>APWL2K,TCPIP*,qAC,T2LAX:;KE6AFE-10*160752z3658.  NW12202.  Wa144.910MHz 1200 R6m Public Winlink Gateway`,
-		Position{36.975, -122.0416666, 2, Symbol{'W', 'a'}}},
+		Position{36.975, -122.0416666, 2, Velocity{}, Symbol{'W', 'a'}}},
 	sample{`KE6AFE-13>APKH2Z,TCPIP*,qAC,CORE-2:;VP@CM86XX*162000z3658.94N/12200.86W? KE6AFE-13 8800`,
-		Position{36.9823333, -122.014333, 0, Symbol{'/', '?'}}},
+		Position{36.9823333, -122.014333, 0, Velocity{}, Symbol{'/', '?'}}},
 }
 
 func assert(t *testing.T, name string, got interface{}, expected interface{}) {
@@ -74,6 +74,8 @@ func TestSamples(t *testing.T) {
 		assert(t, "ambiguity", s.expected.Ambiguity, pos.Ambiguity)
 		assert(t, "table", s.expected.Symbol.Table, pos.Symbol.Table)
 		assert(t, "symbol", s.expected.Symbol.Symbol, pos.Symbol.Symbol)
+		assert(t, "course", s.expected.Velocity.Course, pos.Velocity.Course)
+		assert(t, "speed", s.expected.Velocity.Speed, pos.Velocity.Speed)
 		assertEpsilon(t, "lat", s.expected.Lat, pos.Lat)
 		assertEpsilon(t, "lon", s.expected.Lon, pos.Lon)
 	}
@@ -106,6 +108,10 @@ func assertLatLon(t *testing.T, pos Position, doc SampleDoc) {
 		t.Fatalf("Expected symbol %v, got %v for %v",
 			symbol, pos.Symbol.Symbol, doc.Src)
 	}
+	course, _ := doc.Result["course"].(float64)
+	assertEpsilon(t, "course of "+doc.Src, pos.Velocity.Course, course)
+	speed, _ := doc.Result["speed"].(float64)
+	assertEpsilon(t, "speed of "+doc.Src, pos.Velocity.Speed, speed)
 }
 
 func negAssertLatLon(t *testing.T, pos Position, doc SampleDoc) {
