@@ -133,7 +133,7 @@ func TestFAP(t *testing.T) {
 	expSuccess := 24
 
 	var samples []SampleDoc
-	r, err := os.Open("sample.json")
+	r, err := os.Open("samples/faptests.json")
 	if err != nil {
 		t.Fatalf("Error opening sample.json")
 	}
