@@ -1,7 +1,10 @@
 package aprs
 
 import (
+	"bufio"
+	"compress/bzip2"
 	"encoding/json"
+	"io"
 	"math"
 	"os"
 	"testing"
@@ -183,5 +186,57 @@ func TestDecodeBase91(t *testing.T) {
 	expected := 20346417 + 74529 + 6188 + 22
 	if v != expected {
 		t.Fatalf("Expected %v, got %v", expected, v)
+	}
+}
+
+func getSampleLines(path string) ([]string, int64) {
+	file, err := os.Open(path)
+	if err != nil {
+		panic("Could not open sample file: " + err.Error())
+	}
+	defer file.Close()
+
+	bz := bzip2.NewReader(file)
+	rv := make([]string, 0, 250000)
+
+	bio := bufio.NewReader(bz)
+	bytesread := int64(0)
+	done := false
+
+	for !done {
+		line, err := bio.ReadString('\n')
+		switch err {
+		case nil:
+			rv = append(rv, line)
+			bytesread += int64(len(line))
+		case io.EOF:
+			done = true
+		default:
+			panic("Could not load samples: " + err.Error())
+		}
+	}
+
+	return rv, bytesread
+}
+
+var largeSampleLines []string
+var largeSampleBytes int64
+
+func init() {
+	largeSampleLines, largeSampleBytes = getSampleLines("samples/large.log.bz2")
+}
+
+func BenchmarkMessages(b *testing.B) {
+	b.SetBytes(largeSampleBytes)
+	for i := 0; i < b.N; i++ {
+		ParseAPRSMessage(largeSampleLines[i%len(largeSampleLines)])
+	}
+}
+
+func BenchmarkPositionsFromLog(b *testing.B) {
+	b.SetBytes(largeSampleBytes)
+	for i := 0; i < b.N; i++ {
+		msg := ParseAPRSMessage(largeSampleLines[i%len(largeSampleLines)])
+		msg.Body.Position()
 	}
 }
