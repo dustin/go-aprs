@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"net/textproto"
 	"os"
@@ -10,13 +12,15 @@ import (
 	"github.com/dustin/aprs.go"
 )
 
-var call, pass, filter, server string
+var call, pass, filter, server, rawlog string
+var logWriter io.Writer = ioutil.Discard
 
 func init() {
 	flag.StringVar(&server, "server", "second.aprs.net:14580", "APRS-IS upstream")
 	flag.StringVar(&call, "call", "", "Your callsign")
 	flag.StringVar(&pass, "pass", "", "Your call pass")
 	flag.StringVar(&filter, "filter", "", "Optional filter for APRS-IS server")
+	flag.StringVar(&rawlog, "rawlog", "", "Path to log raw messages")
 }
 
 func main() {
@@ -41,6 +45,13 @@ func main() {
 		filter = fmt.Sprintf(" filter %s", filter)
 	}
 
+	if rawlog != "" {
+		logWriter, err = os.OpenFile(rawlog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+		if err != nil {
+			log.Fatalf("Error opening raw log: %v", err)
+		}
+	}
+
 	conn.PrintfLine("user %s pass %s vers goaprs 0.1%s", call, pass, filter)
 	for {
 		line, err := conn.ReadLine()
@@ -51,7 +62,7 @@ func main() {
 			log.Printf("info: %s", line)
 		} else {
 			msg := aprs.ParseAPRSMessage(line)
-			log.Printf("Raw:  %s", line)
+			fmt.Fprintf(logWriter, "%s\n", line)
 			pos, err := msg.Body.Position()
 			if err == nil {
 				log.Printf("%s sent a ``%v'' to %s:  ``%s'' at %v",
