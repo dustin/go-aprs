@@ -46,9 +46,9 @@ func (s Symbol) Glyph() string {
 func (s Symbol) String() (rv string) {
 	g := s.Glyph()
 	if g == "" {
-		rv = fmt.Sprintf("{%c%c} (%s)", s.Table, s.Symbol, s.Name())
+		rv = fmt.Sprintf("{%c%c: %s}", s.Table, s.Symbol, s.Name())
 	} else {
-		rv = fmt.Sprintf("{%c%c} (%s -  %s )", s.Table, s.Symbol, s.Name(), g)
+		rv = fmt.Sprintf("{%c%c: %s -  %s}", s.Table, s.Symbol, s.Name(), g)
 	}
 	return
 }
