@@ -66,10 +66,10 @@ func main() {
 			pos, err := msg.Body.Position()
 			if err == nil {
 				log.Printf("%s sent a ``%v'' to %s:  ``%s'' at %v",
-					msg.Source, msg.Type(), msg.Dest, msg.Body, pos)
+					msg.Source, msg.Body.Type(), msg.Dest, msg.Body, pos)
 			} else {
 				log.Printf("%s sent a ``%v'' to %s:  ``%s''", msg.Source,
-					msg.Type(), msg.Dest, msg.Body)
+					msg.Body.Type(), msg.Dest, msg.Body)
 			}
 		}
 	}

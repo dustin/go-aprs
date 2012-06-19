@@ -15,8 +15,8 @@ type APRSMessage struct {
 	Body     MsgBody
 }
 
-func (a APRSMessage) Type() PacketType {
-	return PacketType(a.Body[0])
+func (b MsgBody) Type() PacketType {
+	return PacketType(b[0])
 }
 
 func ParseAPRSMessage(i string) APRSMessage {
