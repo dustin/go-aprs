@@ -12,8 +12,11 @@ type APRSMessage struct {
 	Source   string
 	Dest     string
 	Path     []string
-	Type     PacketType
 	Body     MsgBody
+}
+
+func (a APRSMessage) Type() PacketType {
+	return PacketType(a.Body[0])
 }
 
 func ParseAPRSMessage(i string) APRSMessage {
@@ -25,8 +28,7 @@ func ParseAPRSMessage(i string) APRSMessage {
 	return APRSMessage{Original: i,
 		Source: srcparts[0],
 		Dest:   pathparts[0], Path: pathparts[1:],
-		Body: MsgBody(parts[1]),
-		Type: PacketType(parts[1][0])}
+		Body: MsgBody(parts[1])}
 }
 
 func (m *APRSMessage) String() string {
