@@ -189,7 +189,7 @@ func TestDecodeBase91(t *testing.T) {
 	}
 }
 
-func getSampleLines(path string) ([]string, int64) {
+func getSampleLines(path string) []string {
 	file, err := os.Open(path)
 	if err != nil {
 		panic("Could not open sample file: " + err.Error())
@@ -216,27 +216,32 @@ func getSampleLines(path string) ([]string, int64) {
 		}
 	}
 
-	return rv, bytesread
+	return rv
 }
 
-var largeSampleLines []string
-var largeSampleBytes int64
+var largeSample []string
 
 func init() {
-	largeSampleLines, largeSampleBytes = getSampleLines("samples/large.log.bz2")
+	largeSample = getSampleLines("samples/large.log.bz2")
 }
 
 func BenchmarkMessages(b *testing.B) {
-	b.SetBytes(largeSampleBytes)
+	var read int64
 	for i := 0; i < b.N; i++ {
-		ParseAPRSMessage(largeSampleLines[i%len(largeSampleLines)])
+		src := largeSample[i%len(largeSample)]
+		ParseAPRSMessage(src)
+		read += int64(len(src))
 	}
+	b.SetBytes(read / int64(b.N))
 }
 
 func BenchmarkPositionsFromLog(b *testing.B) {
-	b.SetBytes(largeSampleBytes)
+	var read int64
 	for i := 0; i < b.N; i++ {
-		msg := ParseAPRSMessage(largeSampleLines[i%len(largeSampleLines)])
+		src := largeSample[i%len(largeSample)]
+		msg := ParseAPRSMessage(src)
 		msg.Body.Position()
+		read += int64(len(src))
 	}
+	b.SetBytes(read / int64(b.N))
 }
