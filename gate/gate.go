@@ -23,19 +23,21 @@ func init() {
 	flag.StringVar(&rawlog, "rawlog", "", "Path to log raw messages")
 }
 
-func main() {
-	flag.Parse()
-	if call == "" {
-		fmt.Fprintf(os.Stderr, "Your callsign is required.\n")
-		flag.Usage()
-		os.Exit(1)
-	}
-	if pass == "" {
-		fmt.Fprintf(os.Stderr, "Your call pass is required.\n")
-		flag.Usage()
-		os.Exit(1)
-	}
+func reporter(ch <-chan aprs.APRSMessage) {
+	for msg := range ch {
+		pos, err := msg.Body.Position()
+		if err == nil {
+			log.Printf("%s sent a ``%v'' to %s:  ``%s'' at %v",
+				msg.Source, msg.Body.Type(), msg.Dest, msg.Body, pos)
+		} else {
+			log.Printf("%s sent a ``%v'' to %s:  ``%s''", msg.Source,
+				msg.Body.Type(), msg.Dest, msg.Body)
+		}
 
+	}
+}
+
+func readNet(ch chan<- aprs.APRSMessage) {
 	conn, err := textproto.Dial("tcp", server)
 	if err != nil {
 		log.Fatalf("Error making contact: %v", err)
@@ -55,6 +57,7 @@ func main() {
 	conn.PrintfLine("user %s pass %s vers goaprs 0.1%s", call, pass, filter)
 	for {
 		line, err := conn.ReadLine()
+		fmt.Fprintf(logWriter, "%s\n", line)
 		if err != nil {
 			log.Fatalf("Error reading line:  %v", err)
 		}
@@ -62,15 +65,32 @@ func main() {
 			log.Printf("info: %s", line)
 		} else {
 			msg := aprs.ParseAPRSMessage(line)
-			fmt.Fprintf(logWriter, "%s\n", line)
-			pos, err := msg.Body.Position()
-			if err == nil {
-				log.Printf("%s sent a ``%v'' to %s:  ``%s'' at %v",
-					msg.Source, msg.Body.Type(), msg.Dest, msg.Body, pos)
-			} else {
-				log.Printf("%s sent a ``%v'' to %s:  ``%s''", msg.Source,
-					msg.Body.Type(), msg.Dest, msg.Body)
-			}
+			ch <- msg
 		}
 	}
+}
+
+func main() {
+	flag.Parse()
+	if call == "" {
+		fmt.Fprintf(os.Stderr, "Your callsign is required.\n")
+		flag.Usage()
+		os.Exit(1)
+	}
+	if pass == "" {
+		fmt.Fprintf(os.Stderr, "Your call pass is required.\n")
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	ch := make(chan aprs.APRSMessage)
+
+	go reporter(ch)
+
+	if server != "" {
+		go readNet(ch)
+	}
+
+	select {}
+
 }
