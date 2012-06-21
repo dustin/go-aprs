@@ -41,9 +41,9 @@ func reporter(ch <-chan aprs.APRSMessage) {
 }
 
 func processRawMessage(ch chan<- aprs.APRSMessage, line string) {
-	if line[0] == '#' {
+	if len(line) > 0 && line[0] == '#' {
 		log.Printf("info: %s", line)
-	} else {
+	} else if len(line) > 0 {
 		msg := aprs.ParseAPRSMessage(line)
 		ch <- msg
 	}
