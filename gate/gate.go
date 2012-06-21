@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"io"
@@ -10,13 +11,15 @@ import (
 	"os"
 
 	"github.com/dustin/aprs.go"
+	"github.com/dustin/rs232.go"
 )
 
-var call, pass, filter, server, rawlog string
+var call, pass, filter, server, portString, rawlog string
 var logWriter io.Writer = ioutil.Discard
 
 func init() {
 	flag.StringVar(&server, "server", "second.aprs.net:14580", "APRS-IS upstream")
+	flag.StringVar(&portString, "port", "", "Serial port KISS thing")
 	flag.StringVar(&call, "call", "", "Your callsign")
 	flag.StringVar(&pass, "pass", "", "Your call pass")
 	flag.StringVar(&filter, "filter", "", "Optional filter for APRS-IS server")
@@ -34,6 +37,15 @@ func reporter(ch <-chan aprs.APRSMessage) {
 				msg.Body.Type(), msg.Dest, msg.Body)
 		}
 
+	}
+}
+
+func processRawMessage(ch chan<- aprs.APRSMessage, line string) {
+	if line[0] == '#' {
+		log.Printf("info: %s", line)
+	} else {
+		msg := aprs.ParseAPRSMessage(line)
+		ch <- msg
 	}
 }
 
@@ -57,16 +69,27 @@ func readNet(ch chan<- aprs.APRSMessage) {
 	conn.PrintfLine("user %s pass %s vers goaprs 0.1%s", call, pass, filter)
 	for {
 		line, err := conn.ReadLine()
-		fmt.Fprintf(logWriter, "%s\n", line)
 		if err != nil {
 			log.Fatalf("Error reading line:  %v", err)
 		}
-		if line[0] == '#' {
-			log.Printf("info: %s", line)
-		} else {
-			msg := aprs.ParseAPRSMessage(line)
-			ch <- msg
+		fmt.Fprintf(logWriter, "%s\n", line)
+		processRawMessage(ch, line)
+	}
+}
+
+func readSerial(ch chan<- aprs.APRSMessage) {
+	port, err := rs232.OpenPort(portString, 57600, rs232.S_8N1)
+	if err != nil {
+		log.Fatalf("Error opening port: %s", err)
+	}
+
+	r := bufio.NewReader(&port)
+	for {
+		line, _, err := r.ReadLine()
+		if err != nil {
+			log.Fatalf("Error reading:  %s", err)
 		}
+		processRawMessage(ch, string(line))
 	}
 }
 
@@ -89,6 +112,10 @@ func main() {
 
 	if server != "" {
 		go readNet(ch)
+	}
+
+	if portString != "" {
+		go readSerial(ch)
 	}
 
 	select {}
