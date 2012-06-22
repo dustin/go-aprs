@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/dustin/aprs.go"
+	"github.com/dustin/go-aprs"
 )
 
 func TestCapture(t *testing.T) {

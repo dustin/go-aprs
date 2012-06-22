@@ -11,8 +11,8 @@ import (
 	"net/textproto"
 	"os"
 
-	"github.com/dustin/aprs.go"
-	"github.com/dustin/aprs.go/ax25"
+	"github.com/dustin/go-aprs"
+	"github.com/dustin/go-aprs/ax25"
 	"github.com/dustin/rs232.go"
 )
 

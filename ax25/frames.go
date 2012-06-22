@@ -6,7 +6,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/dustin/aprs.go"
+	"github.com/dustin/go-aprs"
 )
 
 const reasonableSize = 14
