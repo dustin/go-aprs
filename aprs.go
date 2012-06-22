@@ -22,8 +22,8 @@ func (a Address) String() string {
 	return rv
 }
 
-var setSSIDMask = byte(0x70)
-var clearSSIDMask = byte(0x30)
+var setSSIDMask = byte(0x70 << 1)
+var clearSSIDMask = byte(0x30 << 1)
 
 func (a Address) kissEncode(ssidMask byte) []byte {
 	rv := make([]byte, 7)
@@ -33,7 +33,7 @@ func (a Address) kissEncode(ssidMask byte) []byte {
 	for i, c := range a.Call {
 		rv[i] = byte(c) << 1
 	}
-	rv[6] = (ssidMask | byte(a.SSID)) << 1
+	rv[6] = ssidMask | (byte(a.SSID) << 1)
 	return rv
 }
 
