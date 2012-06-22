@@ -46,11 +46,11 @@ func assertEpsilon(t *testing.T, field string, expected, got float64) {
 
 func TestAPRS(t *testing.T) {
 	v := ParseAPRSMessage(CHRISTMAS_MSG)
-	assert(t, "Source", v.Source, "KG6HWF")
-	assert(t, "Dest", v.Dest, "APX200")
+	assert(t, "Source", v.Source.String(), "KG6HWF")
+	assert(t, "Dest", v.Dest.String(), "APX200")
 	assert(t, "len(Path)", len(v.Path), 2)
-	assert(t, "Path[0]", v.Path[0], "WIDE1-1")
-	assert(t, "Path[1]", v.Path[1], "WIDE2-1")
+	assert(t, "Path[0]", v.Path[0].String(), "WIDE1-1")
+	assert(t, "Path[1]", v.Path[1].String(), "WIDE2-1")
 	assert(t, "Body", string(v.Body), "=3722.1 N/12159.1 W-Merry Christmas!")
 
 	pos, err := v.Body.Position()
@@ -150,8 +150,8 @@ func TestFAP(t *testing.T) {
 	for _, sample := range samples {
 		if sample.Failed != 1 {
 			v := ParseAPRSMessage(sample.Src)
-			assert(t, "Source", v.Source, sample.Result["srccallsign"])
-			assert(t, "Dest", v.Dest, sample.Result["dstcallsign"])
+			assert(t, "Source", v.Source.String(), sample.Result["srccallsign"])
+			assert(t, "Dest", v.Dest.String(), sample.Result["dstcallsign"])
 			assert(t, "Body", string(v.Body), sample.Result["body"])
 
 			if sample.Misunderstood {
