@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"net/textproto"
 	"os"
 
@@ -103,6 +104,29 @@ func readSerial(ch chan<- aprs.APRSMessage) {
 	}
 }
 
+func sendMessage(w http.ResponseWriter, r *http.Request) {
+	msg := r.FormValue("msg")
+	if radio != nil && msg != "" {
+		_, err := radio.Write([]byte{0xc0, 0x01, 0x04, 0x02,
+			63, 0x03, 20, 0x04, 30})
+		if err != nil {
+			log.Fatal(err)
+		}
+		_, err = radio.Write([]byte(msg))
+		if err != nil {
+			log.Fatal(err)
+		}
+		_, err = radio.Write([]byte{0xc0})
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Fprintf(w, "Message sent")
+	} else {
+		fmt.Fprintf(w, "No message")
+	}
+}
+
 func main() {
 	flag.Parse()
 	ch := make(chan aprs.APRSMessage)
@@ -117,6 +141,7 @@ func main() {
 		go readSerial(ch)
 	}
 
-	select {}
+	http.HandleFunc("/", sendMessage)
 
+	log.Fatal(http.ListenAndServe(":7373", nil))
 }
