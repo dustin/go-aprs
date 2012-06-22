@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"io"
@@ -11,6 +10,7 @@ import (
 	"os"
 
 	"github.com/dustin/aprs.go"
+	"github.com/dustin/aprs.go/ax25"
 	"github.com/dustin/rs232.go"
 )
 
@@ -40,15 +40,6 @@ func reporter(ch <-chan aprs.APRSMessage) {
 	}
 }
 
-func processRawMessage(ch chan<- aprs.APRSMessage, line string) {
-	if len(line) > 0 && line[0] == '#' {
-		log.Printf("info: %s", line)
-	} else if len(line) > 0 {
-		msg := aprs.ParseAPRSMessage(line)
-		ch <- msg
-	}
-}
-
 func readNet(ch chan<- aprs.APRSMessage) {
 	conn, err := textproto.Dial("tcp", server)
 	if err != nil {
@@ -73,7 +64,12 @@ func readNet(ch chan<- aprs.APRSMessage) {
 			log.Fatalf("Error reading line:  %v", err)
 		}
 		fmt.Fprintf(logWriter, "%s\n", line)
-		processRawMessage(ch, line)
+		if len(line) > 0 && line[0] == '#' {
+			log.Printf("info: %s", line)
+		} else if len(line) > 0 {
+			msg := aprs.ParseAPRSMessage(line)
+			ch <- msg
+		}
 	}
 }
 
@@ -83,13 +79,13 @@ func readSerial(ch chan<- aprs.APRSMessage) {
 		log.Fatalf("Error opening port: %s", err)
 	}
 
-	r := bufio.NewReader(&port)
+	d := ax25.NewDecoder(&port)
 	for {
-		line, _, err := r.ReadLine()
+		msg, err := d.Next()
 		if err != nil {
-			log.Fatalf("Error reading:  %s", err)
+			log.Fatalf("Error retrieving APRS message via KISS: %v", err)
 		}
-		processRawMessage(ch, string(line))
+		ch <- msg
 	}
 }
 
