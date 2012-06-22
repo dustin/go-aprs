@@ -53,7 +53,7 @@ func (b MsgBody) Type() PacketType {
 	return PacketType(t)
 }
 
-func parseAddress(s string) Address {
+func AddressFromString(s string) Address {
 	parts := strings.Split(s, "-")
 	rv := Address{Call: parts[0]}
 	if len(parts) > 1 {
@@ -69,7 +69,7 @@ func parseAddresses(addrs []string) []Address {
 	rv := []Address{}
 
 	for _, s := range addrs {
-		rv = append(rv, parseAddress(s))
+		rv = append(rv, AddressFromString(s))
 	}
 
 	return rv
@@ -82,8 +82,8 @@ func ParseAPRSMessage(i string) APRSMessage {
 	pathparts := strings.Split(srcparts[1], ",")
 
 	return APRSMessage{Original: i,
-		Source: parseAddress(srcparts[0]),
-		Dest:   parseAddress(pathparts[0]),
+		Source: AddressFromString(srcparts[0]),
+		Dest:   AddressFromString(pathparts[0]),
 		Path:   parseAddresses(pathparts[1:]),
 		Body:   MsgBody(parts[1])}
 }

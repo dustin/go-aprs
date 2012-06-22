@@ -8,6 +8,7 @@ import (
 	"io"
 	"math"
 	"os"
+	"reflect"
 	"testing"
 )
 
@@ -42,6 +43,42 @@ func assertEpsilon(t *testing.T, field string, expected, got float64) {
 	if math.Abs(got-expected) > 0.0001 {
 		t.Fatalf("Expected %v for %v, got %v -- of by %v",
 			expected, field, got, math.Abs(got-expected))
+	}
+}
+
+func TestAddressConversion(t *testing.T) {
+	testaddrs := []struct {
+		Src     string
+		Exp     Address
+		AX25Cmd []byte
+		AX25Res []byte
+	}{
+		{"KG6HWF", Address{"KG6HWF", 0},
+			[]byte{0x96, 0x8e, 0x6c, 0x90, 0xae, 0x8c, 0xe0},
+			[]byte{0x96, 0x8e, 0x6c, 0x90, 0xae, 0x8c, 0x60}},
+		{"KG6HWF-9", Address{"KG6HWF", 9},
+			[]byte{0x96, 0x8e, 0x6c, 0x90, 0xae, 0x8c, 0xf2},
+			[]byte{0x96, 0x8e, 0x6c, 0x90, 0xae, 0x8c, 0x72}},
+	}
+
+	for _, ta := range testaddrs {
+		a := AddressFromString(ta.Src)
+		if !reflect.DeepEqual(a, ta.Exp) {
+			t.Fatalf("Expected %v for %v, got %v", ta.Exp, ta.Src, a)
+		}
+		a25c := ta.Exp.kissEncode(setSSIDMask)
+		if !reflect.DeepEqual(a25c, ta.AX25Cmd) {
+			t.Fatalf("Expected %v for AX25d %v, got %v", ta.Exp, ta.Src, a)
+		}
+		a25r := ta.Exp.kissEncode(clearSSIDMask)
+		if !reflect.DeepEqual(a25r, ta.AX25Res) {
+			t.Fatalf("Expected %v for AX25d %v, got %v", ta.Exp, ta.Src, a)
+		}
+
+		if ta.Exp.String() != ta.Src {
+			t.Fatalf("Expected to string %v as %s, got %s",
+				ta.Exp, ta.Src, ta.Exp.String())
+		}
 	}
 }
 
