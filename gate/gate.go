@@ -26,6 +26,8 @@ func init() {
 	flag.StringVar(&rawlog, "rawlog", "", "Path to log raw messages")
 }
 
+var radio io.ReadWriteCloser
+
 func reporter(ch <-chan aprs.APRSMessage) {
 	for msg := range ch {
 		pos, err := msg.Body.Position()
@@ -85,12 +87,13 @@ func readNet(ch chan<- aprs.APRSMessage) {
 }
 
 func readSerial(ch chan<- aprs.APRSMessage) {
-	port, err := rs232.OpenPort(portString, 57600, rs232.S_8N1)
+	var err error
+	radio, err = rs232.OpenPort(portString, 57600, rs232.S_8N1)
 	if err != nil {
 		log.Fatalf("Error opening port: %s", err)
 	}
 
-	d := ax25.NewDecoder(&port)
+	d := ax25.NewDecoder(radio)
 	for {
 		msg, err := d.Next()
 		if err != nil {
