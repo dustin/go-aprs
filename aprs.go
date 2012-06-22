@@ -22,6 +22,21 @@ func (a Address) String() string {
 	return rv
 }
 
+var setSSIDMask = byte(0x70)
+var clearSSIDMask = byte(0x30)
+
+func (a Address) kissEncode(ssidMask byte) []byte {
+	rv := make([]byte, 7)
+	for i := 0; i < len(rv); i++ {
+		rv[i] = ' '
+	}
+	for i, c := range a.Call {
+		rv[i] = byte(c) << 1
+	}
+	rv[6] = (ssidMask | byte(a.SSID)) << 1
+	return rv
+}
+
 type APRSMessage struct {
 	Original string
 	Source   Address
@@ -84,4 +99,24 @@ func (m *APRSMessage) String() string {
 	b.WriteByte(':')
 	b.WriteString(string(m.Body))
 	return b.String()
+}
+
+func (m APRSMessage) toAX25(smask, dmask byte) []byte {
+	b := &bytes.Buffer{}
+	b.Write(m.Dest.kissEncode(dmask))
+	b.Write(m.Source.kissEncode(smask))
+	for _, p := range m.Path {
+		b.Write(p.kissEncode(clearSSIDMask))
+	}
+	b.Write([]byte{3, 0xf0})
+	b.Write([]byte(m.Body))
+	return b.Bytes()
+}
+
+func (m APRSMessage) ToAX25Command() []byte {
+	return m.toAX25(setSSIDMask, clearSSIDMask)
+}
+
+func (m APRSMessage) ToAX25Response() []byte {
+	return m.toAX25(clearSSIDMask, setSSIDMask)
 }

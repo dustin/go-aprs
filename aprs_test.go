@@ -3,6 +3,7 @@ package aprs
 import (
 	"bufio"
 	"compress/bzip2"
+	"encoding/hex"
 	"encoding/json"
 	"io"
 	"math"
@@ -65,6 +66,15 @@ func TestAPRS(t *testing.T) {
 	assert(t, "symbol", byte('-'), pos.Symbol.Symbol)
 
 	assert(t, "String()", v.String(), CHRISTMAS_MSG)
+}
+
+func TestKISS(t *testing.T) {
+	v := ParseAPRSMessage(CHRISTMAS_MSG)
+	bc := v.ToAX25Command()
+	t.Logf("Command:\n" + hex.Dump(bc))
+
+	br := v.ToAX25Response()
+	t.Logf("Response:\n" + hex.Dump(br))
 }
 
 func TestSamples(t *testing.T) {
