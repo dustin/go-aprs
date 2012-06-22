@@ -41,6 +41,17 @@ func reporter(ch <-chan aprs.APRSMessage) {
 }
 
 func readNet(ch chan<- aprs.APRSMessage) {
+	if call == "" {
+		fmt.Fprintf(os.Stderr, "Your callsign is required.\n")
+		flag.Usage()
+		os.Exit(1)
+	}
+	if pass == "" {
+		fmt.Fprintf(os.Stderr, "Your call pass is required.\n")
+		flag.Usage()
+		os.Exit(1)
+	}
+
 	conn, err := textproto.Dial("tcp", server)
 	if err != nil {
 		log.Fatalf("Error making contact: %v", err)
@@ -91,17 +102,6 @@ func readSerial(ch chan<- aprs.APRSMessage) {
 
 func main() {
 	flag.Parse()
-	if call == "" {
-		fmt.Fprintf(os.Stderr, "Your callsign is required.\n")
-		flag.Usage()
-		os.Exit(1)
-	}
-	if pass == "" {
-		fmt.Fprintf(os.Stderr, "Your call pass is required.\n")
-		flag.Usage()
-		os.Exit(1)
-	}
-
 	ch := make(chan aprs.APRSMessage)
 
 	go reporter(ch)
