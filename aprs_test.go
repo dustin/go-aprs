@@ -140,7 +140,7 @@ func TestFAP(t *testing.T) {
 	defer r.Close()
 	err = json.NewDecoder(r).Decode(&samples)
 	if err != nil {
-		t.Fatalf("Error reading JSON: %", err)
+		t.Fatalf("Error reading JSON: %v", err)
 	}
 	t.Logf("Found %d messages", len(samples))
 
