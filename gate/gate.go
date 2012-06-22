@@ -105,18 +105,27 @@ func readSerial(ch chan<- aprs.APRSMessage) {
 }
 
 func sendMessage(w http.ResponseWriter, r *http.Request) {
-	msg := r.FormValue("msg")
+	src := r.FormValue("src")
+	dest := r.FormValue("dest")
+	text := r.FormValue("msg")
 	if radio == nil {
 		fmt.Fprintf(w, "No radio")
 		return
 	}
 
-	if msg != "" {
+	if text != "" {
 		_, err := radio.Write([]byte{0xc0, 0x14, 0x32, 0x43, 0x00})
 		if err != nil {
 			log.Fatal(err)
 		}
-		_, err = radio.Write([]byte(msg))
+
+		msg := aprs.APRSMessage{
+			Source: aprs.AddressFromString(src),
+			Dest:   aprs.AddressFromString(dest),
+			Body:   aprs.MsgBody(text),
+		}
+
+		_, err = radio.Write(msg.ToAX25Command())
 		if err != nil {
 			log.Fatal(err)
 		}
