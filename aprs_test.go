@@ -266,13 +266,17 @@ func getSampleLines(path string) []string {
 	return rv
 }
 
-var largeSample []string
+var largeSample []string = nil
 
-func init() {
-	largeSample = getSampleLines("samples/large.log.bz2")
+func loadLargeSample(b *testing.B) {
+	if largeSample == nil {
+		largeSample = getSampleLines("samples/large.log.bz2")
+		b.ResetTimer()
+	}
 }
 
 func BenchmarkMessages(b *testing.B) {
+	loadLargeSample(b)
 	var read int64
 	for i := 0; i < b.N; i++ {
 		src := largeSample[i%len(largeSample)]
@@ -283,6 +287,7 @@ func BenchmarkMessages(b *testing.B) {
 }
 
 func BenchmarkPositionsFromLog(b *testing.B) {
+	loadLargeSample(b)
 	var read int64
 	for i := 0; i < b.N; i++ {
 		src := largeSample[i%len(largeSample)]
