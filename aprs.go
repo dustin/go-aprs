@@ -31,7 +31,11 @@ type APRSMessage struct {
 }
 
 func (b MsgBody) Type() PacketType {
-	return PacketType(b[0])
+	t := byte(0)
+	if len(b) > 0 {
+		t = b[0]
+	}
+	return PacketType(t)
 }
 
 func parseAddress(s string) Address {
