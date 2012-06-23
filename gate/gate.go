@@ -10,14 +10,11 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"strings"
-	"time"
 
 	"github.com/dustin/go-aprs"
 	"github.com/dustin/go-aprs/aprsis"
 	"github.com/dustin/go-aprs/ax25"
 	"github.com/dustin/rs232.go"
-	"github.com/pmylund/go-cache"
 )
 
 var call, pass, filter, server, portString, rawlog string
@@ -47,44 +44,6 @@ func reporter(b *broadcaster) {
 		} else {
 			log.Printf("%s sent a ``%v'' to %s:  ``%s''", msg.Source,
 				msg.Body.Type(), msg.Dest, msg.Body)
-		}
-	}
-}
-
-func notify(b *broadcaster) {
-	notifiers, err := loadNotifiers("notify.json")
-	if err != nil {
-		notifiers = []notifier{}
-		log.Printf("No notifiers loaded because %v", err)
-	}
-
-	ch := make(chan aprs.APRSMessage)
-	b.Register(ch)
-	defer b.Unregister(ch)
-
-	c := cache.New(10*time.Minute, time.Minute)
-
-	for msg := range ch {
-		k := fmt.Sprintf("%v %v %v", msg.Dest, msg.Source, msg.Body)
-
-		_, found := c.Get(k)
-		if found {
-			log.Printf("Skipping duplicate message: %v", k)
-			continue
-		}
-
-		c.Set(k, "hi", 0)
-
-		note := notification{msg.Body.Type().String(), string(msg.Body)}
-		for _, n := range notifiers {
-			if n.To == msg.Dest.Call {
-				go n.notify(note)
-			} else if msg.Body.Type().IsMessage() &&
-				msg.Body.Recipient().Call == n.To &&
-				!strings.HasPrefix(msg.Body.Message(), "ack") {
-				note.Msg = msg.Body.Message()
-				go n.notify(note)
-			}
 		}
 	}
 }
@@ -247,7 +206,7 @@ func main() {
 
 	broadcaster := NewBroadcaster(ch)
 
-	go reporter(broadcaster)
+	// go reporter(broadcaster)
 	go notify(broadcaster)
 
 	if server != "" {
