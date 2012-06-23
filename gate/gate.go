@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"os"
 
@@ -30,7 +31,11 @@ func init() {
 
 var radio io.ReadWriteCloser
 
-func reporter(ch <-chan aprs.APRSMessage) {
+func reporter(b *broadcaster) {
+	ch := make(chan aprs.APRSMessage)
+	b.Register(ch)
+	defer b.Unregister(ch)
+
 	for msg := range ch {
 		pos, err := msg.Body.Position()
 		if err == nil {
@@ -160,11 +165,49 @@ func sendMessage(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func handleIS(conn net.Conn, b *broadcaster) {
+	ch := make(chan aprs.APRSMessage, 100)
+
+	_, err := fmt.Fprintf(conn, "# goaprs\n")
+	if err != nil {
+		log.Printf("Error sending banner: %v", err)
+	}
+
+	b.Register(ch)
+	defer b.Unregister(ch)
+
+	for m := range ch {
+		_, err = conn.Write([]byte(m.String() + "\n"))
+		if err != nil {
+			log.Printf("Error on connection:  %v", err)
+			return
+		}
+	}
+}
+
+func startIS(b *broadcaster) {
+	ln, err := net.Listen("tcp", ":10152")
+	if err != nil {
+		log.Fatal(err)
+	}
+	for {
+		conn, err := ln.Accept()
+		if err != nil {
+			log.Printf("Error accepting connections: %v", err)
+			continue
+		}
+		go handleIS(conn, b)
+	}
+}
+
 func main() {
 	flag.Parse()
-	ch := make(chan aprs.APRSMessage)
 
-	go reporter(ch)
+	ch := make(chan aprs.APRSMessage, 100)
+
+	broadcaster := NewBroadcaster(ch)
+
+	go reporter(broadcaster)
 
 	if server != "" {
 		go readNet(ch)
@@ -173,6 +216,8 @@ func main() {
 	if portString != "" {
 		go readSerial(ch)
 	}
+
+	go startIS(broadcaster)
 
 	http.HandleFunc("/", sendMessage)
 
