@@ -23,8 +23,8 @@ var logWriter io.Writer = ioutil.Discard
 func init() {
 	flag.StringVar(&server, "server", "second.aprs.net:14580", "APRS-IS upstream")
 	flag.StringVar(&portString, "port", "", "Serial port KISS thing")
-	flag.StringVar(&call, "call", "", "Your callsign")
-	flag.StringVar(&pass, "pass", "", "Your call pass")
+	flag.StringVar(&call, "call", "", "Your callsign (for APRS-IS)")
+	flag.StringVar(&pass, "pass", "", "Your call pass (for APRS-IS)")
 	flag.StringVar(&filter, "filter", "", "Optional filter for APRS-IS server")
 	flag.StringVar(&rawlog, "rawlog", "", "Path to log raw messages")
 }
