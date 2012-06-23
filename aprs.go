@@ -22,6 +22,17 @@ func (a Address) String() string {
 	return rv
 }
 
+func (a Address) CallPass() (rv int16) {
+	rv = 0x73e2
+	for i := 0; i < len(a.Call); {
+		rv ^= int16(a.Call[i]) << 8
+		rv ^= int16(a.Call[i+1])
+		i += 2
+	}
+	rv &= 0x7fff
+	return
+}
+
 var setSSIDMask = byte(0x70 << 1)
 var clearSSIDMask = byte(0x30 << 1)
 
