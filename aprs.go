@@ -64,6 +64,26 @@ func (b MsgBody) Type() PacketType {
 	return PacketType(t)
 }
 
+func (b MsgBody) Recipient() (rv Address) {
+	if b.Type().IsMessage() {
+		parts := strings.SplitN(string(b[1:]), ":", 2)
+		if len(parts) > 0 {
+			rv = AddressFromString(strings.TrimSpace(parts[0]))
+		}
+	}
+	return
+}
+
+func (b MsgBody) Message() (rv string) {
+	if b.Type().IsMessage() {
+		parts := strings.SplitN(string(b[1:]), ":", 3)
+		if len(parts) > 0 {
+			rv = parts[1]
+		}
+	}
+	return
+}
+
 func AddressFromString(s string) Address {
 	parts := strings.Split(s, "-")
 	rv := Address{Call: parts[0]}

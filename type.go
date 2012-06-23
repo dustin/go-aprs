@@ -33,6 +33,10 @@ var packetTypeNames = map[byte]string{
 	'}':  "Third-party traffic",
 }
 
+func (p PacketType) IsMessage() bool {
+	return p == ':'
+}
+
 func (p PacketType) String() (rv string) {
 	if t, ok := packetTypeNames[byte(p)]; ok {
 		rv = t
