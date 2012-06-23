@@ -8,10 +8,10 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/textproto"
 	"os"
 
 	"github.com/dustin/go-aprs"
+	"github.com/dustin/go-aprs/aprsis"
 	"github.com/dustin/go-aprs/ax25"
 	"github.com/dustin/rs232.go"
 )
@@ -44,6 +44,13 @@ func reporter(ch <-chan aprs.APRSMessage) {
 	}
 }
 
+type loggingInfoHandler struct{}
+
+func (*loggingInfoHandler) Info(msg string) {
+	log.Printf("info: %s", msg)
+
+}
+
 func readNet(ch chan<- aprs.APRSMessage) {
 	if call == "" {
 		fmt.Fprintf(os.Stderr, "Your callsign is required.\n")
@@ -56,35 +63,30 @@ func readNet(ch chan<- aprs.APRSMessage) {
 		os.Exit(1)
 	}
 
-	conn, err := textproto.Dial("tcp", server)
+	is, err := aprsis.Dial("tcp", server)
 	if err != nil {
 		log.Fatalf("Error making contact: %v", err)
 	}
 
-	if filter != "" {
-		filter = fmt.Sprintf(" filter %s", filter)
-	}
-
 	if rawlog != "" {
-		logWriter, err = os.OpenFile(rawlog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+		logWriter, err := os.OpenFile(rawlog,
+			os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 		if err != nil {
 			log.Fatalf("Error opening raw log: %v", err)
 		}
+		is.SetRawLog(logWriter)
 	}
 
-	conn.PrintfLine("user %s pass %s vers goaprs 0.1%s", call, pass, filter)
+	is.SetInfoHandler(&loggingInfoHandler{})
+
+	is.Auth(call, pass, filter)
+
 	for {
-		line, err := conn.ReadLine()
+		msg, err := is.Next()
 		if err != nil {
 			log.Fatalf("Error reading line:  %v", err)
 		}
-		fmt.Fprintf(logWriter, "%s\n", line)
-		if len(line) > 0 && line[0] == '#' {
-			log.Printf("info: %s", line)
-		} else if len(line) > 0 {
-			msg := aprs.ParseAPRSMessage(line)
-			ch <- msg
-		}
+		ch <- msg
 	}
 }
 
