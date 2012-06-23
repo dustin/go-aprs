@@ -11,11 +11,13 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/dustin/go-aprs"
 	"github.com/dustin/go-aprs/aprsis"
 	"github.com/dustin/go-aprs/ax25"
 	"github.com/dustin/rs232.go"
+	"github.com/pmylund/go-cache"
 )
 
 var call, pass, filter, server, portString, rawlog string
@@ -60,7 +62,19 @@ func notify(b *broadcaster) {
 	b.Register(ch)
 	defer b.Unregister(ch)
 
+	c := cache.New(10*time.Minute, time.Minute)
+
 	for msg := range ch {
+		k := fmt.Sprintf("%v %v %v", msg.Dest, msg.Source, msg.Body)
+
+		_, found := c.Get(k)
+		if found {
+			log.Printf("Skipping duplicate message: %v", k)
+			continue
+		}
+
+		c.Set(k, "hi", 0)
+
 		note := notification{msg.Body.Type().String(), string(msg.Body)}
 		for _, n := range notifiers {
 			if n.To == msg.Dest.Call {
