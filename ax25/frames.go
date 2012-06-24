@@ -97,9 +97,17 @@ func addressEncode(a aprs.Address, ssidMask byte) []byte {
 func toAX25(m aprs.APRSData, smask, dmask byte) []byte {
 	b := &bytes.Buffer{}
 	b.Write(addressEncode(m.Dest, dmask))
+	mask := smask
+	if len(m.Path) == 0 {
+		mask |= 1
+	}
 	b.Write(addressEncode(m.Source, smask))
-	for _, p := range m.Path {
-		b.Write(addressEncode(p, clearSSIDMask))
+	for i, p := range m.Path {
+		mask = clearSSIDMask
+		if i == len(m.Path)-1 {
+			mask |= 1
+		}
+		b.Write(addressEncode(p, mask))
 	}
 	b.Write([]byte{3, 0xf0})
 	b.Write([]byte(m.Body))
