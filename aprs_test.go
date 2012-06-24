@@ -112,6 +112,26 @@ func TestAPRS(t *testing.T) {
 	assert(t, "String()", v.String(), CHRISTMAS_MSG)
 }
 
+func TestInvalid(t *testing.T) {
+	v := ParseAPRSData("Invalid")
+	if v.IsValid() {
+		t.Fatalf("Expected invalid data out of the parse")
+	}
+	assert(t, "Source", v.Source.String(), "")
+	assert(t, "Dest", v.Dest.String(), "")
+	assert(t, "len(Path)", len(v.Path), 0)
+	assert(t, "Body", string(v.Body), "")
+
+	v = ParseAPRSData("Invalid:Thing")
+	if v.IsValid() {
+		t.Fatalf("Expected invalid data out of the parse")
+	}
+	assert(t, "Source", v.Source.String(), "")
+	assert(t, "Dest", v.Dest.String(), "")
+	assert(t, "len(Path)", len(v.Path), 0)
+	assert(t, "Body", string(v.Body), "")
+}
+
 func TestMessage(t *testing.T) {
 	v := ParseAPRSData(MESSAGE)
 	msg := v.Message()

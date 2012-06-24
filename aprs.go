@@ -41,6 +41,10 @@ type APRSData struct {
 	Body     Info
 }
 
+func (d APRSData) IsValid() bool {
+	return d.Original != ""
+}
+
 func (b Info) Type() PacketType {
 	t := byte(0)
 	if len(b) > 0 {
@@ -74,7 +78,13 @@ func parseAddresses(addrs []string) []Address {
 func ParseAPRSData(i string) APRSData {
 	parts := strings.SplitN(i, ":", 2)
 
+	if len(parts) != 2 {
+		return APRSData{}
+	}
 	srcparts := strings.SplitN(parts[0], ">", 2)
+	if len(srcparts) < 2 {
+		return APRSData{}
+	}
 	pathparts := strings.Split(srcparts[1], ",")
 
 	return APRSData{Original: i,
