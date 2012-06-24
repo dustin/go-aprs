@@ -135,7 +135,7 @@ func notify(b *broadcaster) {
 	b.Register(ch)
 	defer b.Unregister(ch)
 
-	c := cache.New(10*time.Minute, time.Minute)
+	c := cache.New(time.Hour, time.Minute)
 
 	for msg := range ch {
 		for msg.Body.Type().IsThirdParty() && len(msg.Body) > 1 {
@@ -145,7 +145,7 @@ func notify(b *broadcaster) {
 
 		_, found := c.Get(k)
 		if found {
-			log.Printf("Skipping duplicate message: %v", k)
+			// Already processed this one.
 			continue
 		}
 
