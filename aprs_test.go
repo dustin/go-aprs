@@ -15,6 +15,7 @@ import (
 const (
 	CHRISTMAS_MSG = "KG6HWF>APX200,WIDE1-1,WIDE2-1:=3722.1 N/12159.1 W-Merry Christmas!"
 	MESSAGE       = "KG6HWF-9>APDR12,TCPIP*,qAC,T2SPAIN2::KG6HWF   :testing notifications{10"
+	MESSAGE2      = "K7FED-10>APJI23,WR6ABD*:}KG6HWE>APOA00,TCPIP,K7FED-10*::KG6HWF   :yo{AB}07"
 )
 
 const SAMPLE2 = `K7FED-1>APNX01,qAR,W6MSU-7:!3739.12N112132.05W#PHG5750 W1, K7FED FILL-IN LLNL S300`
@@ -135,6 +136,27 @@ func TestMessage(t *testing.T) {
 		t.Fatalf("Didn't find the receipient: %v", v.Body.Recipient())
 	}
 	if v.Body.Message() != "testing notifications{10" {
+		t.Fatalf("Didn't get the message: %#v from %#v", v.Body.Message(), v.Body)
+	}
+}
+
+func TestThirdParty(t *testing.T) {
+	v := ParseAPRSMessage(MESSAGE2)
+	if !v.Body.Type().IsThirdParty() {
+		t.Fatalf("This should be third party traffic: %#v", v.Body)
+	}
+
+	v = ParseAPRSMessage(string(v.Body[1:]))
+	if !v.Body.Type().IsMessage() {
+		t.Fatalf("This should be a message: %#v", v.Body)
+	}
+	if v.Source.String() != "KG6HWE" {
+		t.Fatalf("Incorrect sender: %v", v.Source)
+	}
+	if v.Body.Recipient().String() != "KG6HWF" {
+		t.Fatalf("Didn't find the receipient: %v", v.Body.Recipient())
+	}
+	if v.Body.Message() != "yo{AB}07" {
 		t.Fatalf("Didn't get the message: %#v from %#v", v.Body.Message(), v.Body)
 	}
 }

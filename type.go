@@ -37,6 +37,10 @@ func (p PacketType) IsMessage() bool {
 	return p == ':'
 }
 
+func (p PacketType) IsThirdParty() bool {
+	return p == '}'
+}
+
 func (p PacketType) String() (rv string) {
 	if t, ok := packetTypeNames[byte(p)]; ok {
 		rv = t
