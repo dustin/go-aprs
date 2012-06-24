@@ -129,14 +129,22 @@ func TestAPRS(t *testing.T) {
 
 func TestMessage(t *testing.T) {
 	v := ParseAPRSMessage(MESSAGE)
-	if !v.Body.Type().IsMessage() {
-		t.Fatalf("This should be a message")
+	msg := v.Message()
+
+	if !msg.Parsed {
+		t.Fatalf("Couldn't parse %v as a message", v)
 	}
-	if v.Body.Recipient().String() != "KG6HWF" {
-		t.Fatalf("Didn't find the receipient: %v", v.Body.Recipient())
+	if msg.Sender.String() != "KG6HWF-9" {
+		t.Fatalf("Didn't find the sender: %v", msg.Recipient)
 	}
-	if v.Body.Message() != "testing notifications{10" {
-		t.Fatalf("Didn't get the message: %#v from %#v", v.Body.Message(), v.Body)
+	if msg.Recipient.String() != "KG6HWF" {
+		t.Fatalf("Didn't find the receipient: %v", msg.Recipient)
+	}
+	if msg.Body != "testing notifications" {
+		t.Fatalf("Didn't get the message: %#v from %#v", msg.Body, v.Body)
+	}
+	if msg.Id != "10" {
+		t.Fatalf("Expected msg id 10, got %v", msg.Id)
 	}
 }
 
@@ -145,19 +153,22 @@ func TestThirdParty(t *testing.T) {
 	if !v.Body.Type().IsThirdParty() {
 		t.Fatalf("This should be third party traffic: %#v", v.Body)
 	}
+	msg := v.Message()
 
-	v = ParseAPRSMessage(string(v.Body[1:]))
-	if !v.Body.Type().IsMessage() {
-		t.Fatalf("This should be a message: %#v", v.Body)
+	if !msg.Parsed {
+		t.Fatalf("Couldn't parse %v as a message", v)
 	}
-	if v.Source.String() != "KG6HWE" {
+	if msg.Sender.String() != "KG6HWE" {
 		t.Fatalf("Incorrect sender: %v", v.Source)
 	}
-	if v.Body.Recipient().String() != "KG6HWF" {
-		t.Fatalf("Didn't find the receipient: %v", v.Body.Recipient())
+	if msg.Recipient.String() != "KG6HWF" {
+		t.Fatalf("Didn't find the receipient: %v", msg.Recipient)
 	}
-	if v.Body.Message() != "yo{AB}07" {
-		t.Fatalf("Didn't get the message: %#v from %#v", v.Body.Message(), v.Body)
+	if msg.Body != "yo" {
+		t.Fatalf("Didn't get the message: %#v from %#v", msg.Body, v.Body)
+	}
+	if msg.Id != "AB}07" {
+		t.Fatalf("Expected msg id AB}07, got %v", msg.Id)
 	}
 }
 

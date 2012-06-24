@@ -153,12 +153,11 @@ func notify(b *broadcaster) {
 
 		note := notification{msg.Body.Type().String(), string(msg.Body)}
 		for _, n := range notifiers {
+			m := msg.Message()
 			if n.To == msg.Dest.Call {
 				go n.notify(note)
-			} else if msg.Body.Type().IsMessage() &&
-				msg.Body.Recipient().Call == n.To &&
-				!strings.HasPrefix(msg.Body.Message(), "ack") {
-				note.Msg = msg.Body.Message()
+			} else if m.Parsed && m.Recipient.Call == n.To && m.Body != "ack" {
+				note.Msg = m.Body
 				go n.notify(note)
 			}
 		}
