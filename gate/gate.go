@@ -32,7 +32,7 @@ func init() {
 var radio io.ReadWriteCloser
 
 func reporter(b *broadcaster) {
-	ch := make(chan aprs.APRSMessage)
+	ch := make(chan aprs.APRSData)
 	b.Register(ch)
 	defer b.Unregister(ch)
 
@@ -55,7 +55,7 @@ func (*loggingInfoHandler) Info(msg string) {
 
 }
 
-func readNet(ch chan<- aprs.APRSMessage) {
+func readNet(ch chan<- aprs.APRSData) {
 	if call == "" {
 		fmt.Fprintf(os.Stderr, "Your callsign is required.\n")
 		flag.Usage()
@@ -94,7 +94,7 @@ func readNet(ch chan<- aprs.APRSMessage) {
 	}
 }
 
-func readSerial(ch chan<- aprs.APRSMessage) {
+func readSerial(ch chan<- aprs.APRSData) {
 	var err error
 	radio, err = rs232.OpenPort(portString, 57600, rs232.S_8N1)
 	if err != nil {
@@ -133,12 +133,12 @@ func sendMessage(rw http.ResponseWriter, r *http.Request) {
 			log.Fatalf("Expected to write two bytes, wrote %v", n)
 		}
 
-		msg := aprs.APRSMessage{
+		msg := aprs.APRSData{
 			Source: aprs.AddressFromString(src),
 			Dest:   aprs.AddressFromString(dest),
 			Path: []aprs.Address{
 				aprs.AddressFromString("WIDE2-2")},
-			Body: aprs.MsgBody(text),
+			Body: aprs.Info(text),
 		}
 
 		body := msg.ToAX25Command()
@@ -165,7 +165,7 @@ func sendMessage(rw http.ResponseWriter, r *http.Request) {
 }
 
 func handleIS(conn net.Conn, b *broadcaster) {
-	ch := make(chan aprs.APRSMessage, 100)
+	ch := make(chan aprs.APRSData, 100)
 
 	_, err := fmt.Fprintf(conn, "# goaprs\n")
 	if err != nil {
@@ -202,7 +202,7 @@ func startIS(b *broadcaster) {
 func main() {
 	flag.Parse()
 
-	ch := make(chan aprs.APRSMessage, 100)
+	ch := make(chan aprs.APRSData, 100)
 
 	broadcaster := NewBroadcaster(ch)
 

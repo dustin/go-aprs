@@ -29,7 +29,7 @@ func (d dumbInfoHandlerT) Info(msg string) {
 
 var dumbInfoHandler dumbInfoHandlerT
 
-func (a *APRSIS) Next() (rv aprs.APRSMessage, err error) {
+func (a *APRSIS) Next() (rv aprs.APRSData, err error) {
 	var line string
 	for err == nil || err == emptyMessage {
 		line, err = a.conn.ReadLine()
@@ -42,7 +42,7 @@ func (a *APRSIS) Next() (rv aprs.APRSMessage, err error) {
 		if len(line) > 0 && line[0] == '#' {
 			a.infoHandler.Info(line)
 		} else if len(line) > 0 {
-			rv = aprs.ParseAPRSMessage(line)
+			rv = aprs.ParseAPRSData(line)
 			return rv, nil
 		}
 	}

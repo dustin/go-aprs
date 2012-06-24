@@ -131,7 +131,7 @@ func notify(b *broadcaster) {
 		log.Printf("No notifiers loaded because %v", err)
 	}
 
-	ch := make(chan aprs.APRSMessage)
+	ch := make(chan aprs.APRSData)
 	b.Register(ch)
 	defer b.Unregister(ch)
 
@@ -139,7 +139,7 @@ func notify(b *broadcaster) {
 
 	for msg := range ch {
 		for msg.Body.Type().IsThirdParty() && len(msg.Body) > 1 {
-			msg = aprs.ParseAPRSMessage(string(msg.Body[1:]))
+			msg = aprs.ParseAPRSData(string(msg.Body[1:]))
 		}
 		k := fmt.Sprintf("%v %v %v", msg.Dest, msg.Source, msg.Body)
 

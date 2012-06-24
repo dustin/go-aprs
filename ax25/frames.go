@@ -26,7 +26,7 @@ func parseAddr(in []byte) aprs.Address {
 	return rv
 }
 
-func decodeMessage(frame []byte) (rv aprs.APRSMessage, err error) {
+func decodeMessage(frame []byte) (rv aprs.APRSData, err error) {
 	frame = frame[:len(frame)-1]
 
 	if len(frame) < reasonableSize {
@@ -50,7 +50,7 @@ func decodeMessage(frame []byte) (rv aprs.APRSMessage, err error) {
 		return
 	}
 
-	rv.Body = aprs.MsgBody(string(frame[2:]))
+	rv.Body = aprs.Info(string(frame[2:]))
 
 	return
 }
@@ -61,13 +61,13 @@ type Decoder struct {
 }
 
 // Get the next message.
-func (d *Decoder) Next() (aprs.APRSMessage, error) {
+func (d *Decoder) Next() (aprs.APRSData, error) {
 	frame := []byte{}
 	var err error
 	for len(frame) < reasonableSize {
 		frame, err = d.r.ReadBytes(byte(0xc0))
 		if err != nil {
-			return aprs.APRSMessage{}, err
+			return aprs.APRSData{}, err
 		}
 	}
 	return decodeMessage(frame)

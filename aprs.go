@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-type MsgBody string
+type Info string
 
 type Address struct {
 	Call string
@@ -48,15 +48,15 @@ func (a Address) kissEncode(ssidMask byte) []byte {
 	return rv
 }
 
-type APRSMessage struct {
+type APRSData struct {
 	Original string
 	Source   Address
 	Dest     Address
 	Path     []Address
-	Body     MsgBody
+	Body     Info
 }
 
-func (b MsgBody) Type() PacketType {
+func (b Info) Type() PacketType {
 	t := byte(0)
 	if len(b) > 0 {
 		t = b[0]
@@ -86,20 +86,20 @@ func parseAddresses(addrs []string) []Address {
 	return rv
 }
 
-func ParseAPRSMessage(i string) APRSMessage {
+func ParseAPRSData(i string) APRSData {
 	parts := strings.SplitN(i, ":", 2)
 
 	srcparts := strings.SplitN(parts[0], ">", 2)
 	pathparts := strings.Split(srcparts[1], ",")
 
-	return APRSMessage{Original: i,
+	return APRSData{Original: i,
 		Source: AddressFromString(srcparts[0]),
 		Dest:   AddressFromString(pathparts[0]),
 		Path:   parseAddresses(pathparts[1:]),
-		Body:   MsgBody(parts[1])}
+		Body:   Info(parts[1])}
 }
 
-func (m *APRSMessage) String() string {
+func (m *APRSData) String() string {
 	b := bytes.NewBufferString(m.Source.String())
 	b.WriteByte('>')
 	b.WriteString(m.Dest.String())
@@ -112,7 +112,7 @@ func (m *APRSMessage) String() string {
 	return b.String()
 }
 
-func (m APRSMessage) toAX25(smask, dmask byte) []byte {
+func (m APRSData) toAX25(smask, dmask byte) []byte {
 	b := &bytes.Buffer{}
 	b.Write(m.Dest.kissEncode(dmask))
 	b.Write(m.Source.kissEncode(smask))
@@ -124,10 +124,10 @@ func (m APRSMessage) toAX25(smask, dmask byte) []byte {
 	return b.Bytes()
 }
 
-func (m APRSMessage) ToAX25Command() []byte {
+func (m APRSData) ToAX25Command() []byte {
 	return m.toAX25(setSSIDMask, clearSSIDMask)
 }
 
-func (m APRSMessage) ToAX25Response() []byte {
+func (m APRSData) ToAX25Response() []byte {
 	return m.toAX25(clearSSIDMask, setSSIDMask)
 }

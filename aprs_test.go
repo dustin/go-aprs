@@ -105,7 +105,7 @@ func TestCallPass(t *testing.T) {
 }
 
 func TestAPRS(t *testing.T) {
-	v := ParseAPRSMessage(CHRISTMAS_MSG)
+	v := ParseAPRSData(CHRISTMAS_MSG)
 	assert(t, "Source", v.Source.String(), "KG6HWF")
 	assert(t, "Dest", v.Dest.String(), "APX200")
 	assert(t, "len(Path)", len(v.Path), 2)
@@ -128,7 +128,7 @@ func TestAPRS(t *testing.T) {
 }
 
 func TestMessage(t *testing.T) {
-	v := ParseAPRSMessage(MESSAGE)
+	v := ParseAPRSData(MESSAGE)
 	msg := v.Message()
 
 	if !msg.Parsed {
@@ -149,7 +149,7 @@ func TestMessage(t *testing.T) {
 }
 
 func TestThirdParty(t *testing.T) {
-	v := ParseAPRSMessage(MESSAGE2)
+	v := ParseAPRSData(MESSAGE2)
 	if !v.Body.Type().IsThirdParty() {
 		t.Fatalf("This should be third party traffic: %#v", v.Body)
 	}
@@ -173,7 +173,7 @@ func TestThirdParty(t *testing.T) {
 }
 
 func TestKISS(t *testing.T) {
-	v := ParseAPRSMessage(CHRISTMAS_MSG)
+	v := ParseAPRSData(CHRISTMAS_MSG)
 	bc := v.ToAX25Command()
 	t.Logf("Command:\n" + hex.Dump(bc))
 
@@ -183,7 +183,7 @@ func TestKISS(t *testing.T) {
 
 func TestSamples(t *testing.T) {
 	for _, s := range samples {
-		v := ParseAPRSMessage(s.src)
+		v := ParseAPRSData(s.src)
 		pos, err := v.Body.Position()
 		if err != nil {
 			t.Fatalf("Error getting position from %v: %v", s.src, err)
@@ -263,7 +263,7 @@ func TestFAP(t *testing.T) {
 
 	for _, sample := range samples {
 		if sample.Failed != 1 {
-			v := ParseAPRSMessage(sample.Src)
+			v := ParseAPRSData(sample.Src)
 			assert(t, "Source", v.Source.String(), sample.Result["srccallsign"])
 			assert(t, "Dest", v.Dest.String(), sample.Result["dstcallsign"])
 			assert(t, "Body", string(v.Body), sample.Result["body"])
@@ -347,7 +347,7 @@ func BenchmarkMessages(b *testing.B) {
 	var read int64
 	for i := 0; i < b.N; i++ {
 		src := largeSample[i%len(largeSample)]
-		ParseAPRSMessage(src)
+		ParseAPRSData(src)
 		read += int64(len(src))
 	}
 	b.SetBytes(read / int64(b.N))
@@ -358,7 +358,7 @@ func BenchmarkPositionsFromLog(b *testing.B) {
 	var read int64
 	for i := 0; i < b.N; i++ {
 		src := largeSample[i%len(largeSample)]
-		msg := ParseAPRSMessage(src)
+		msg := ParseAPRSData(src)
 		msg.Body.Position()
 		read += int64(len(src))
 	}

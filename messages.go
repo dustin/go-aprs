@@ -12,10 +12,10 @@ type Message struct {
 	Parsed    bool
 }
 
-func (a APRSMessage) Message() (rv Message) {
+func (a APRSData) Message() (rv Message) {
 	// Find source of third party
 	for a.Body.Type().IsThirdParty() && len(a.Body) > 11 {
-		a = ParseAPRSMessage(string(a.Body[1:]))
+		a = ParseAPRSData(string(a.Body[1:]))
 	}
 
 	if a.Body.Type().IsMessage() {

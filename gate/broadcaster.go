@@ -5,11 +5,11 @@ import (
 )
 
 type broadcaster struct {
-	input <-chan aprs.APRSMessage
-	reg   chan chan<- aprs.APRSMessage
-	unreg chan chan<- aprs.APRSMessage
+	input <-chan aprs.APRSData
+	reg   chan chan<- aprs.APRSData
+	unreg chan chan<- aprs.APRSData
 
-	outputs map[chan<- aprs.APRSMessage]bool
+	outputs map[chan<- aprs.APRSData]bool
 }
 
 func (b *broadcaster) cleanup() {
@@ -18,7 +18,7 @@ func (b *broadcaster) cleanup() {
 	}
 }
 
-func (b *broadcaster) broadcast(m aprs.APRSMessage) {
+func (b *broadcaster) broadcast(m aprs.APRSData) {
 	for ch := range b.outputs {
 		ch <- m
 	}
@@ -47,11 +47,11 @@ func (b *broadcaster) run() {
 	}
 }
 
-func NewBroadcaster(input <-chan aprs.APRSMessage) *broadcaster {
+func NewBroadcaster(input <-chan aprs.APRSData) *broadcaster {
 	b := &broadcaster{
 		input:   input,
-		reg:     make(chan chan<- aprs.APRSMessage),
-		outputs: make(map[chan<- aprs.APRSMessage]bool),
+		reg:     make(chan chan<- aprs.APRSData),
+		outputs: make(map[chan<- aprs.APRSData]bool),
 	}
 
 	go b.run()
@@ -59,11 +59,11 @@ func NewBroadcaster(input <-chan aprs.APRSMessage) *broadcaster {
 	return b
 }
 
-func (b *broadcaster) Register(newch chan<- aprs.APRSMessage) {
+func (b *broadcaster) Register(newch chan<- aprs.APRSData) {
 	b.reg <- newch
 }
 
-func (b *broadcaster) Unregister(newch chan<- aprs.APRSMessage) {
+func (b *broadcaster) Unregister(newch chan<- aprs.APRSData) {
 	b.unreg <- newch
 }
 

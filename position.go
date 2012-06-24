@@ -180,7 +180,7 @@ func positionCompressed(input string) (pos Position, err error) {
 }
 
 // Get the position of the message.
-func (body MsgBody) Position() (pos Position, err error) {
+func (body Info) Position() (pos Position, err error) {
 	pos, err = positionUncompressed(string(body))
 	if err == nil {
 		return
