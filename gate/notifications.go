@@ -138,6 +138,9 @@ func notify(b *broadcaster) {
 	c := cache.New(10*time.Minute, time.Minute)
 
 	for msg := range ch {
+		for msg.Body.Type().IsThirdParty() && len(msg.Body) > 1 {
+			msg = aprs.ParseAPRSMessage(string(msg.Body[1:]))
+		}
 		k := fmt.Sprintf("%v %v %v", msg.Dest, msg.Source, msg.Body)
 
 		_, found := c.Get(k)
