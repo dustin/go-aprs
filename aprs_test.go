@@ -3,7 +3,6 @@ package aprs
 import (
 	"bufio"
 	"compress/bzip2"
-	"encoding/hex"
 	"encoding/json"
 	"io"
 	"math"
@@ -52,31 +51,17 @@ func assertEpsilon(t *testing.T, field string, expected, got float64) {
 
 func TestAddressConversion(t *testing.T) {
 	testaddrs := []struct {
-		Src     string
-		Exp     Address
-		AX25Cmd []byte
-		AX25Res []byte
+		Src string
+		Exp Address
 	}{
-		{"KG6HWF", Address{"KG6HWF", 0},
-			[]byte{0x96, 0x8e, 0x6c, 0x90, 0xae, 0x8c, 0xe0},
-			[]byte{0x96, 0x8e, 0x6c, 0x90, 0xae, 0x8c, 0x60}},
-		{"KG6HWF-9", Address{"KG6HWF", 9},
-			[]byte{0x96, 0x8e, 0x6c, 0x90, 0xae, 0x8c, 0xf2},
-			[]byte{0x96, 0x8e, 0x6c, 0x90, 0xae, 0x8c, 0x72}},
+		{"KG6HWF", Address{"KG6HWF", 0}},
+		{"KG6HWF-9", Address{"KG6HWF", 9}},
 	}
 
 	for _, ta := range testaddrs {
 		a := AddressFromString(ta.Src)
 		if !reflect.DeepEqual(a, ta.Exp) {
 			t.Fatalf("Expected %v for %v, got %v", ta.Exp, ta.Src, a)
-		}
-		a25c := ta.Exp.kissEncode(setSSIDMask)
-		if !reflect.DeepEqual(a25c, ta.AX25Cmd) {
-			t.Fatalf("Expected %v for AX25d %v, got %v", ta.Exp, ta.Src, a)
-		}
-		a25r := ta.Exp.kissEncode(clearSSIDMask)
-		if !reflect.DeepEqual(a25r, ta.AX25Res) {
-			t.Fatalf("Expected %v for AX25d %v, got %v", ta.Exp, ta.Src, a)
 		}
 
 		if ta.Exp.String() != ta.Src {
@@ -170,15 +155,6 @@ func TestThirdParty(t *testing.T) {
 	if msg.Id != "AB}07" {
 		t.Fatalf("Expected msg id AB}07, got %v", msg.Id)
 	}
-}
-
-func TestKISS(t *testing.T) {
-	v := ParseAPRSData(CHRISTMAS_MSG)
-	bc := v.ToAX25Command()
-	t.Logf("Command:\n" + hex.Dump(bc))
-
-	br := v.ToAX25Response()
-	t.Logf("Response:\n" + hex.Dump(br))
 }
 
 func TestSamples(t *testing.T) {

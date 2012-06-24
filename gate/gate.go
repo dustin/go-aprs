@@ -141,7 +141,7 @@ func sendMessage(rw http.ResponseWriter, r *http.Request) {
 			Body: aprs.Info(text),
 		}
 
-		body := msg.ToAX25Command()
+		body := ax25.EncodeAPRSCommand(msg)
 		n, err = w.Write(body)
 		if err != nil {
 			log.Fatal(err)

@@ -2,6 +2,7 @@ package ax25
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"io"
 	"strings"
@@ -13,6 +14,9 @@ const reasonableSize = 14
 
 var shortMessage = errors.New("short message")
 var truncatedMessage = errors.New("truncated message")
+
+var setSSIDMask = byte(0x70 << 1)
+var clearSSIDMask = byte(0x30 << 1)
 
 func parseAddr(in []byte) aprs.Address {
 	out := make([]byte, len(in))
@@ -76,4 +80,36 @@ func (d *Decoder) Next() (aprs.APRSData, error) {
 // Get a new decoder over this reader.
 func NewDecoder(r io.Reader) *Decoder {
 	return &Decoder{bufio.NewReader(r)}
+}
+
+func addressEncode(a aprs.Address, ssidMask byte) []byte {
+	rv := make([]byte, 7)
+	for i := 0; i < len(rv); i++ {
+		rv[i] = ' '
+	}
+	for i, c := range a.Call {
+		rv[i] = byte(c) << 1
+	}
+	rv[6] = ssidMask | (byte(a.SSID) << 1)
+	return rv
+}
+
+func toAX25(m aprs.APRSData, smask, dmask byte) []byte {
+	b := &bytes.Buffer{}
+	b.Write(addressEncode(m.Dest, dmask))
+	b.Write(addressEncode(m.Source, smask))
+	for _, p := range m.Path {
+		b.Write(addressEncode(p, clearSSIDMask))
+	}
+	b.Write([]byte{3, 0xf0})
+	b.Write([]byte(m.Body))
+	return b.Bytes()
+}
+
+func EncodeAPRSCommand(m aprs.APRSData) []byte {
+	return toAX25(m, setSSIDMask, clearSSIDMask)
+}
+
+func EncodeAPRSResponse(m aprs.APRSData) []byte {
+	return toAX25(m, clearSSIDMask, setSSIDMask)
 }
