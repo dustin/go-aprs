@@ -11,6 +11,7 @@ import (
 )
 
 var emptyMessage = errors.New("empty message")
+var invalidMessage = errors.New("invalid message")
 
 type APRSIS struct {
 	conn        *textproto.Conn
@@ -43,7 +44,10 @@ func (a *APRSIS) Next() (rv aprs.APRSData, err error) {
 			a.infoHandler.Info(line)
 		} else if len(line) > 0 {
 			rv = aprs.ParseAPRSData(line)
-			return rv, nil
+			if !rv.IsValid() {
+				err = invalidMessage
+			}
+			return rv, err
 		}
 	}
 
