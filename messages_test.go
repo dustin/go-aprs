@@ -53,3 +53,15 @@ func TestThirdParty(t *testing.T) {
 		t.Fatalf("Expected msg id AB}07, got %v", msg.Id)
 	}
 }
+
+func TestMessageEncoding(t *testing.T) {
+	exp := ":KG6HWF   :yo{AB}07"
+	m := Message{Sender: AddressFromString("KG6HWE"),
+		Recipient: AddressFromString("KG6HWF"),
+		Body:      "yo",
+		Id:        "AB}07",
+	}
+	if m.String() != exp {
+		t.Fatalf("Expected %v, got %v", exp, m.String())
+	}
+}

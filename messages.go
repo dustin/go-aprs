@@ -1,6 +1,7 @@
 package aprs
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -30,4 +31,13 @@ func (a APRSData) Message() (rv Message) {
 		rv.Parsed = true
 	}
 	return
+}
+
+func (m Message) String() string {
+	idstring := ""
+	if m.Id != "" {
+		idstring = "{" + m.Id
+	}
+	return fmt.Sprintf(":%-9s:%s%s", m.Recipient.String(),
+		m.Body, idstring)
 }
