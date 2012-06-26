@@ -42,7 +42,7 @@ func assert(t *testing.T, name string, got interface{}, expected interface{}) {
 
 func assertEpsilon(t *testing.T, field string, expected, got float64) {
 	if math.Abs(got-expected) > 0.0001 {
-		t.Fatalf("Expected %v for %v, got %v -- of by %v",
+		t.Fatalf("Expected %v for %v, got %v -- off by %v",
 			expected, field, got, math.Abs(got-expected))
 	}
 }
@@ -175,9 +175,9 @@ func assertLatLon(t *testing.T, pos Position, doc SampleDoc) {
 			symbol, pos.Symbol.Symbol, doc.Src)
 	}
 	course, _ := doc.Result["course"].(float64)
-	assertEpsilon(t, "course of "+doc.Src, pos.Velocity.Course, course)
+	assertEpsilon(t, "course of "+doc.Src, course, pos.Velocity.Course)
 	speed, _ := doc.Result["speed"].(float64)
-	assertEpsilon(t, "speed of "+doc.Src, pos.Velocity.Speed, speed)
+	assertEpsilon(t, "speed of "+doc.Src, speed, pos.Velocity.Speed)
 }
 
 func negAssertLatLon(t *testing.T, pos Position, doc SampleDoc) {
@@ -193,7 +193,7 @@ func negAssertLatLon(t *testing.T, pos Position, doc SampleDoc) {
 }
 
 func TestFAP(t *testing.T) {
-	expSuccess := 24
+	expSuccess := 29
 
 	var samples []SampleDoc
 	r, err := os.Open("samples/faptests.json")

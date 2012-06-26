@@ -3,9 +3,11 @@ package aprs
 import (
 	"errors"
 	"fmt"
+	"math"
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 const coordField = `(\d{1,3})([0-5 ][0-9 ])\.([0-9 ]+)([NEWS])`
@@ -21,6 +23,7 @@ var compressedPositionRegexp = regexp.MustCompile("([!=/@])(" +
 	b91chars + "{4})(" + b91chars + "{4})(.)(..)(.)")
 
 var NoPositionFound = errors.New("No Positions Found")
+var TruncatedMessage = errors.New("Truncated message")
 
 type Symbol struct {
 	Table  byte
@@ -69,6 +72,83 @@ type Position struct {
 func (p Position) String() string {
 	return fmt.Sprintf("{lat=%v, lon=%v, amb=%v, sym=%v}",
 		p.Lat, p.Lon, p.Ambiguity, p.Symbol)
+}
+
+func uncompressedParser(input string) (pos Position, err error) {
+	// lat:8 symtab:1 lon:9 sym:1
+	if len(input) < 19 {
+		return pos, TruncatedMessage
+	}
+
+	pos.Symbol.Table = input[8]
+	pos.Symbol.Symbol = input[18]
+
+	nums := []float64{0, 0, 0, 0}
+	toparse := []string{input[0:2], input[2:7], input[9:12], input[12:17]}
+
+	for i, p := range toparse {
+		converted := strings.Map(func(r rune) (rv rune) {
+			rv = r
+			if r == ' ' {
+				pos.Ambiguity++
+				rv = '0'
+			}
+			return
+		}, p)
+		n, err := strconv.ParseFloat(converted, 64)
+		if err != nil {
+			return pos, err
+		}
+		nums[i] = n
+	}
+
+	a := nums[0] + (nums[1] / 60)
+	b := nums[2] + (nums[3] / 60)
+
+	pos.Ambiguity /= 2
+	offby := 0.0
+	switch pos.Ambiguity {
+	case 0:
+		// This is exact
+	case 1:
+		// Nearest 1/10 of a minute
+		offby = 0.05 / 60.0
+	case 2:
+		// Nearest minute
+		offby = 0.5 / 60.0
+	case 3:
+		// Nearest 10 minutes
+		offby = 5.0 / 60.0
+	case 4:
+		// Nearest degree
+		offby = 0.5
+	default:
+		return pos, fmt.Errorf("Invalid position ambiguity %d from %v",
+			pos.Ambiguity, input)
+	}
+	if offby > 0 {
+		a += offby
+		b += offby
+	}
+
+	if input[7] == 'S' {
+		a = 0 - a
+	}
+	if input[17] == 'W' {
+		b = 0 - b
+	}
+
+	pos.Lat = a
+	pos.Lon = b
+
+	ext := input[19:]
+	if len(ext) >= 7 && pos.Symbol.Symbol != '_' && ext[3] == '/' {
+		fmt.Sscanf(ext, "%f/%f",
+			&pos.Velocity.Course, &pos.Velocity.Speed)
+		pos.Velocity.Speed *= 1.852
+	}
+
+	return
 }
 
 func positionUncompressed(input string) (pos Position, err error) {
@@ -148,8 +228,6 @@ func positionUncompressed(input string) (pos Position, err error) {
 		pos.Velocity.Speed *= 1.852
 	}
 
-	// log.Printf("uncomp matched %#v -> %v", found, pos)
-
 	return
 }
 
@@ -174,17 +252,76 @@ func positionCompressed(input string) (pos Position, err error) {
 	pos.Lat = 90 - float64(decodeBase91([]byte(found[0][2])))/380926
 	pos.Lon = -180 + float64(decodeBase91([]byte(found[0][3])))/190463
 
-	// log.Printf("comp matched %#v (%v)-> %v,%v", found, found[0][4], lat, lon)
+	cs := found[0][5]
+	if cs[0] != ' ' && cs[1] != ' ' && int(cs[0]) >= '!' && int(cs[0]) <= 'z' {
+		pos.Velocity.Course = (float64(cs[0]) - 33) * 4
+		if pos.Velocity.Course == 0 {
+			pos.Velocity.Course = 360
+		}
+		pos.Velocity.Speed = 1.852 * (math.Pow(1.08, float64(cs[1]-33)) - 1)
+
+	}
 
 	return pos, nil
 }
 
-// Get the position of the message.
-func (body Info) Position() (pos Position, err error) {
-	pos, err = positionUncompressed(string(body))
+func positionOld(t string) (pos Position, err error) {
+	pos, err = positionUncompressed(t)
 	if err == nil {
 		return
 	}
-	pos, err = positionCompressed(string(body))
+	pos, err = positionCompressed(t)
 	return
+}
+
+func compressedParser(input string) (pos Position, err error) {
+	if len(input) < 12 {
+		return pos, TruncatedMessage
+	}
+	pos.Symbol.Table = input[0]
+	pos.Symbol.Symbol = input[9]
+	pos.Lat = 90 - float64(decodeBase91([]byte(input[1:5])))/380926
+	pos.Lon = -180 + float64(decodeBase91([]byte(input[5:9])))/190463
+	if input[10] != ' ' && input[11] != ' ' && int(input[10]) >= '!' && int(input[10]) <= 'z' {
+		pos.Velocity.Course = (float64(input[10]) - 33) * 4
+		if pos.Velocity.Course == 0 {
+			pos.Velocity.Course = 360
+		}
+		pos.Velocity.Speed = 1.852 * (math.Pow(1.08, float64(input[11]-33)) - 1)
+	}
+	return
+}
+
+func newParser(input string, uncompressed bool) (pos Position, err error) {
+	if uncompressed {
+		pos, err = uncompressedParser(input)
+	} else {
+		pos, err = compressedParser(input)
+	}
+	return
+}
+
+// Get the position of the message.
+func (body Info) Position() (pos Position, err error) {
+	switch body.Type() {
+	case '!', '=':
+		t := string(body)
+		return newParser(t[1:], unicode.IsDigit(rune(t[1])))
+	case '/', '@':
+		t := string(body[8:])
+		return newParser(t, unicode.IsDigit(rune(body[8])))
+	case ';':
+		t := string(body)
+		if len(t) < 19 {
+			return pos, TruncatedMessage
+		}
+		return newParser(t[18:], unicode.IsDigit(rune(body[18])))
+		// t := string(body[1:])
+		// name := strings.TrimSpace(t[1:9])
+		// live := t[9] == '*'
+		// ts := t[10:17]
+	case ')':
+		// item
+	}
+	return positionOld(string(body))
 }
