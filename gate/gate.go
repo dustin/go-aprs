@@ -1,3 +1,4 @@
+// An APRS gateway.
 package main
 
 import (

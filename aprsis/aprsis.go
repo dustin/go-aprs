@@ -1,3 +1,4 @@
+// Interface to APRS-IS service.
 package aprsis
 
 import (

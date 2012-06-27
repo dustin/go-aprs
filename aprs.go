@@ -1,3 +1,4 @@
+// Amateur Packet Radio Service library.
 package aprs
 
 import (

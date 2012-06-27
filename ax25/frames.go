@@ -1,3 +1,4 @@
+// AX.25 encoding and decoding lib.
 package ax25
 
 import (
