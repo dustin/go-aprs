@@ -94,7 +94,7 @@ func ParseAPRSData(i string) APRSData {
 		Body:   Info(parts[1])}
 }
 
-func (m *APRSData) String() string {
+func (m APRSData) String() string {
 	b := bytes.NewBufferString(m.Source.String())
 	b.WriteByte('>')
 	b.WriteString(m.Dest.String())
