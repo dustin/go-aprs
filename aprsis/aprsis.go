@@ -14,12 +14,14 @@ import (
 var emptyMessage = errors.New("empty message")
 var invalidMessage = errors.New("invalid message")
 
+// An APRSIS connection.
 type APRSIS struct {
 	conn        *textproto.Conn
 	rawLog      io.Writer
 	infoHandler InfoHandler
 }
 
+// Handler for incoming info messages.
 type InfoHandler interface {
 	Info(msg string)
 }
@@ -31,6 +33,7 @@ func (d dumbInfoHandlerT) Info(msg string) {
 
 var dumbInfoHandler dumbInfoHandlerT
 
+// Get the next APRS message from this connection.
 func (a *APRSIS) Next() (rv aprs.APRSData, err error) {
 	var line string
 	for err == nil || err == emptyMessage {
@@ -55,14 +58,17 @@ func (a *APRSIS) Next() (rv aprs.APRSData, err error) {
 	return rv, emptyMessage
 }
 
+// Set a writer that will receive all raw APRS-IS messages.
 func (a *APRSIS) SetRawLog(to io.Writer) {
 	a.rawLog = to
 }
 
+// Set a handler for APRS-IS Info messages.
 func (a *APRSIS) SetInfoHandler(to InfoHandler) {
 	a.infoHandler = to
 }
 
+// Connect to an APRS-IS service.
 func Dial(prot, addr string) (rv *APRSIS, err error) {
 	var conn *textproto.Conn
 	conn, err = textproto.Dial(prot, addr)
@@ -76,6 +82,7 @@ func Dial(prot, addr string) (rv *APRSIS, err error) {
 	}, nil
 }
 
+// Authenticate and optionally set a filter.
 func (a *APRSIS) Auth(user, pass, filter string) error {
 	if filter != "" {
 		filter = fmt.Sprintf(" filter %s", filter)
