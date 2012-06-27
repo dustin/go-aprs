@@ -51,6 +51,7 @@ func NewBroadcaster(input <-chan aprs.APRSData) *broadcaster {
 	b := &broadcaster{
 		input:   input,
 		reg:     make(chan chan<- aprs.APRSData),
+		unreg:   make(chan chan<- aprs.APRSData),
 		outputs: make(map[chan<- aprs.APRSData]bool),
 	}
 
