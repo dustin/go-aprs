@@ -115,10 +115,12 @@ func toAX25(m aprs.APRSData, smask, dmask byte) []byte {
 	return b.Bytes()
 }
 
+// Encode an APRS command to an AX.25 frame.
 func EncodeAPRSCommand(m aprs.APRSData) []byte {
 	return toAX25(m, setSSIDMask, clearSSIDMask)
 }
 
+// Encode an APRS response to an AX.25 frame.
 func EncodeAPRSResponse(m aprs.APRSData) []byte {
 	return toAX25(m, clearSSIDMask, setSSIDMask)
 }
