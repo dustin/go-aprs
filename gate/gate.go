@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/dustin/go-aprs"
 	"github.com/dustin/go-aprs/aprsis"
@@ -56,6 +57,37 @@ func (*loggingInfoHandler) Info(msg string) {
 
 }
 
+func netClient(ch chan<- aprs.APRSData) error {
+
+	is, err := aprsis.Dial("tcp", server)
+	if err != nil {
+		return err
+	}
+
+	is.Auth(call, pass, filter)
+
+	if rawlog != "" {
+		logWriter, err := os.OpenFile(rawlog,
+			os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+		if err != nil {
+			return err
+		}
+		is.SetRawLog(logWriter)
+	}
+
+	is.SetInfoHandler(&loggingInfoHandler{})
+
+	for {
+		msg, err := is.Next()
+		if err != nil {
+			return err
+		}
+		ch <- msg
+	}
+
+	panic("Unreachable")
+}
+
 func readNet(ch chan<- aprs.APRSData) {
 	if call == "" {
 		fmt.Fprintf(os.Stderr, "Your callsign is required.\n")
@@ -68,30 +100,10 @@ func readNet(ch chan<- aprs.APRSData) {
 		os.Exit(1)
 	}
 
-	is, err := aprsis.Dial("tcp", server)
-	if err != nil {
-		log.Fatalf("Error making contact: %v", err)
-	}
-
-	if rawlog != "" {
-		logWriter, err := os.OpenFile(rawlog,
-			os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
-		if err != nil {
-			log.Fatalf("Error opening raw log: %v", err)
-		}
-		is.SetRawLog(logWriter)
-	}
-
-	is.SetInfoHandler(&loggingInfoHandler{})
-
-	is.Auth(call, pass, filter)
-
 	for {
-		msg, err := is.Next()
-		if err != nil {
-			log.Fatalf("Error reading line:  %v", err)
-		}
-		ch <- msg
+		log.Printf("*** Error reading from net:  %v (restarting)",
+			netClient(ch))
+		time.Sleep(time.Second)
 	}
 }
 
