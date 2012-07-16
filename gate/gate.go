@@ -7,7 +7,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"net"
 	"net/http"
 	"os"
 	"time"
@@ -123,42 +122,10 @@ func readSerial(ch chan<- aprs.APRSData) {
 	}
 }
 
-func handleIS(conn net.Conn, b *broadcaster) {
-	ch := make(chan aprs.APRSData, 100)
-
-	_, err := fmt.Fprintf(conn, "# goaprs\n")
-	if err != nil {
-		log.Printf("Error sending banner: %v", err)
-	}
-
-	b.Register(ch)
-	defer b.Unregister(ch)
-
-	for m := range ch {
-		_, err = conn.Write([]byte(m.String() + "\n"))
-		if err != nil {
-			log.Printf("Error on connection:  %v", err)
-			return
-		}
-	}
-}
-
-func startIS(b *broadcaster) {
-	ln, err := net.Listen("tcp", ":10152")
-	if err != nil {
-		log.Fatal(err)
-	}
-	for {
-		conn, err := ln.Accept()
-		if err != nil {
-			log.Printf("Error accepting connections: %v", err)
-			continue
-		}
-		go handleIS(conn, b)
-	}
-}
-
 func main() {
+	var serverNet, serverAddr string
+	flag.StringVar(&serverNet, "is-net", "tcp", "Network for APRS-IS server")
+	flag.StringVar(&serverAddr, "is-addr", ":10152", "Bind address for APRS-IS server")
 	flag.Parse()
 
 	ch := make(chan aprs.APRSData, 100)
@@ -176,7 +143,7 @@ func main() {
 		go readSerial(ch)
 	}
 
-	go startIS(broadcaster)
+	go startIS(serverNet, serverAddr, broadcaster)
 
 	log.Fatal(http.ListenAndServe(":7373", nil))
 }
