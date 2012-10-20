@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"log/syslog"
 	"net/http"
 	"os"
 	"time"
@@ -126,7 +127,17 @@ func main() {
 	var serverNet, serverAddr string
 	flag.StringVar(&serverNet, "is-net", "tcp", "Network for APRS-IS server")
 	flag.StringVar(&serverAddr, "is-addr", ":10152", "Bind address for APRS-IS server")
+	useSyslog := flag.Bool("syslog", false, "Log to syslog")
 	flag.Parse()
+
+	if *useSyslog {
+		sl, err := syslog.New(syslog.LOG_INFO, "aprs-gate")
+		if err != nil {
+			log.Fatalf("Error initializing syslog")
+		}
+		log.SetOutput(sl)
+		log.SetFlags(0)
+	}
 
 	ch := make(chan aprs.APRSData, 100)
 
