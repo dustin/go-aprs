@@ -20,6 +20,9 @@ func (a APRSData) Message() (rv Message) {
 	}
 
 	if a.Body.Type().IsMessage() {
+		if len(a.Body) < 12 {
+			return
+		}
 		rv.Sender = a.Source
 		rv.Recipient = AddressFromString(strings.TrimSpace(string(a.Body[1:10])))
 		parts := strings.SplitN(string(a.Body[11:]), "{", 2)
