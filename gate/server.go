@@ -7,6 +7,7 @@ import (
 	"net"
 
 	"github.com/dustin/go-aprs"
+	"github.com/dustin/go-broadcast"
 )
 
 // Server filters limit the packets that are received over APRS-IS
@@ -64,8 +65,8 @@ func (p Point) Distance(p2 Point) float64 {
 			math.Cos(p.RadLon()-p2.RadLon()))) * r
 }
 
-func handleIS(conn net.Conn, b *broadcaster) {
-	ch := make(chan aprs.APRSData, 100)
+func handleIS(conn net.Conn, b broadcast.Broadcaster) {
+	ch := make(chan interface{}, 100)
 
 	_, err := fmt.Fprintf(conn, "# goaprs\n")
 	if err != nil {
@@ -76,7 +77,7 @@ func handleIS(conn net.Conn, b *broadcaster) {
 	defer b.Unregister(ch)
 
 	for m := range ch {
-		_, err = conn.Write([]byte(m.String() + "\n"))
+		_, err = fmt.Fprintln(conn, m)
 		if err != nil {
 			log.Printf("Error on connection:  %v", err)
 			return
@@ -84,7 +85,7 @@ func handleIS(conn net.Conn, b *broadcaster) {
 	}
 }
 
-func startIS(n, addr string, b *broadcaster) {
+func startIS(n, addr string, b broadcast.Broadcaster) {
 	ln, err := net.Listen(n, addr)
 	if err != nil {
 		log.Fatal(err)

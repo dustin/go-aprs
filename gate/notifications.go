@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/dustin/go-aprs"
+	"github.com/dustin/go-broadcast"
 	"github.com/dustin/nma.go"
 	"github.com/pmylund/go-cache"
 	"github.com/rem7/goprowl"
@@ -124,20 +125,21 @@ func loadNotifiers(path string) ([]notifier, error) {
 	return notifiers, nil
 }
 
-func notify(b *broadcaster) {
+func notify(b broadcast.Broadcaster) {
 	notifiers, err := loadNotifiers("notify.json")
 	if err != nil {
 		notifiers = []notifier{}
 		log.Printf("No notifiers loaded because %v", err)
 	}
 
-	ch := make(chan aprs.APRSData)
+	ch := make(chan interface{})
 	b.Register(ch)
 	defer b.Unregister(ch)
 
 	c := cache.New(time.Hour, time.Minute)
 
-	for msg := range ch {
+	for msgi := range ch {
+		msg := msgi.(aprs.APRSData)
 		for msg.Body.Type().IsThirdParty() && len(msg.Body) > 1 {
 			msg = aprs.ParseAPRSData(string(msg.Body[1:]))
 		}

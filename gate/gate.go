@@ -15,6 +15,7 @@ import (
 	"github.com/dustin/go-aprs"
 	"github.com/dustin/go-aprs/aprsis"
 	"github.com/dustin/go-aprs/ax25"
+	"github.com/dustin/go-broadcast"
 	"github.com/dustin/rs232.go"
 )
 
@@ -32,12 +33,13 @@ func init() {
 
 var radio io.ReadWriteCloser
 
-func reporter(b *broadcaster) {
-	ch := make(chan aprs.APRSData)
+func reporter(b broadcast.Broadcaster) {
+	ch := make(chan interface{})
 	b.Register(ch)
 	defer b.Unregister(ch)
 
-	for msg := range ch {
+	for msgi := range ch {
+		msg := msgi.(aprs.APRSData)
 		pos, err := msg.Body.Position()
 		if err == nil {
 			log.Printf("%s sent a ``%v'' to %s:  ``%s'' at %v",
@@ -56,8 +58,7 @@ func (*loggingInfoHandler) Info(msg string) {
 
 }
 
-func netClient(ch chan<- aprs.APRSData) error {
-
+func netClient(b broadcast.Broadcaster) error {
 	is, err := aprsis.Dial("tcp", server)
 	if err != nil {
 		return err
@@ -81,13 +82,13 @@ func netClient(ch chan<- aprs.APRSData) error {
 		if err != nil {
 			return err
 		}
-		ch <- msg
+		b.Submit(msg)
 	}
 
 	panic("Unreachable")
 }
 
-func readNet(ch chan<- aprs.APRSData) {
+func readNet(b broadcast.Broadcaster) {
 	if call == "" {
 		fmt.Fprintf(os.Stderr, "Your callsign is required.\n")
 		flag.Usage()
@@ -101,12 +102,12 @@ func readNet(ch chan<- aprs.APRSData) {
 
 	for {
 		log.Printf("*** Error reading from net:  %v (restarting)",
-			netClient(ch))
+			netClient(b))
 		time.Sleep(time.Second)
 	}
 }
 
-func readSerial(ch chan<- aprs.APRSData) {
+func readSerial(b broadcast.Broadcaster) {
 	var err error
 	radio, err = rs232.OpenPort(portString, 57600, rs232.S_8N1)
 	if err != nil {
@@ -119,7 +120,7 @@ func readSerial(ch chan<- aprs.APRSData) {
 		if err != nil {
 			log.Fatalf("Error retrieving APRS message via KISS: %v", err)
 		}
-		ch <- msg
+		b.Submit(msg)
 	}
 }
 
@@ -139,19 +140,17 @@ func main() {
 		log.SetFlags(0)
 	}
 
-	ch := make(chan aprs.APRSData, 100)
-
-	broadcaster := NewBroadcaster(ch)
+	broadcaster := broadcast.NewBroadcaster(100)
 
 	// go reporter(broadcaster)
 	go notify(broadcaster)
 
 	if server != "" {
-		go readNet(ch)
+		go readNet(broadcaster)
 	}
 
 	if portString != "" {
-		go readSerial(ch)
+		go readSerial(broadcaster)
 	}
 
 	go startIS(serverNet, serverAddr, broadcaster)
