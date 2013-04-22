@@ -101,8 +101,8 @@ func readNet(b broadcast.Broadcaster) {
 	}
 
 	for {
-		log.Printf("*** Error reading from net:  %v (restarting)",
-			netClient(b))
+		err := netClient(b)
+		log.Printf("*** Error reading from net:  %v (restarting)", err)
 		time.Sleep(time.Second)
 	}
 }
