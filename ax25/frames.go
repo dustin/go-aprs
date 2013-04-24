@@ -26,7 +26,7 @@ func parseAddr(in []byte) aprs.Address {
 	}
 	rv := aprs.Address{
 		Call: strings.TrimSpace(string(out[:len(out)-1])),
-		SSID: int((out[len(out)-1]) & 0xf),
+		SSID: uint8((out[len(out)-1]) & 0xf),
 	}
 	return rv
 }
