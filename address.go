@@ -9,7 +9,7 @@ import (
 // An APRS address (callsign with optional SSID)
 type Address struct {
 	Call string
-	SSID int
+	SSID uint8
 }
 
 // The string representation of an address.
@@ -50,7 +50,7 @@ func AddressFromString(s string) Address {
 	if len(parts) > 1 {
 		x, err := strconv.ParseInt(parts[1], 10, 32)
 		if err == nil {
-			rv.SSID = int(x)
+			rv.SSID = uint8(x)
 		}
 	}
 	return rv
