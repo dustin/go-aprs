@@ -84,8 +84,6 @@ func netClient(b broadcast.Broadcaster) error {
 		}
 		b.Submit(msg)
 	}
-
-	panic("Unreachable")
 }
 
 func readNet(b broadcast.Broadcaster) {
