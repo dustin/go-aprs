@@ -16,7 +16,7 @@ import (
 	"github.com/dustin/go-aprs/aprsis"
 	"github.com/dustin/go-aprs/ax25"
 	"github.com/dustin/go-broadcast"
-	"github.com/dustin/rs232.go"
+	"github.com/dustin/go-rs232"
 )
 
 var call, pass, filter, server, portString, rawlog string
