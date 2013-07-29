@@ -282,7 +282,7 @@ func getSampleLines(path string) []string {
 	return rv
 }
 
-var largeSample []string = nil
+var largeSample []string
 
 func loadLargeSample(b *testing.B) {
 	if largeSample == nil {

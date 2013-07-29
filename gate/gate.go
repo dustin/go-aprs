@@ -20,7 +20,7 @@ import (
 )
 
 var call, pass, filter, server, portString, rawlog string
-var logWriter io.Writer = ioutil.Discard
+var logWriter = io.Writer(ioutil.Discard)
 
 func init() {
 	flag.StringVar(&server, "server", "second.aprs.net:14580", "APRS-IS upstream")
