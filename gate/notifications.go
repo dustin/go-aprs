@@ -13,7 +13,7 @@ import (
 
 	"github.com/dustin/go-aprs"
 	"github.com/dustin/go-broadcast"
-	"github.com/dustin/nma.go"
+	"github.com/dustin/go-nma"
 	"github.com/pmylund/go-cache"
 	"github.com/rem7/goprowl"
 )
