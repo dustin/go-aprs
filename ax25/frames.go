@@ -32,12 +32,12 @@ func parseAddr(in []byte) aprs.Address {
 }
 
 func decodeMessage(frame []byte) (rv aprs.APRSData, err error) {
-	frame = frame[:len(frame)-1]
-
-	if len(frame) < reasonableSize {
+	if len(frame) < reasonableSize+1 {
 		err = shortMessage
 		return
 	}
+
+	frame = frame[:len(frame)-1]
 
 	rv.Source = parseAddr(frame[8:15])
 	rv.Dest = parseAddr(frame[1:8])

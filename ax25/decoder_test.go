@@ -9,6 +9,24 @@ import (
 	"github.com/dustin/go-aprs"
 )
 
+func TestUnreasonablySmall(t *testing.T) {
+	for i := 0; i < reasonableSize+1; i++ {
+		a, err := decodeMessage(make([]byte, i))
+		if err != shortMessage {
+			t.Errorf("expected shortMessage error at %v, got %v/%v",
+				i, a, err)
+		}
+	}
+}
+
+func TestTruncated(t *testing.T) {
+	data := make([]byte, 20)
+	a, err := decodeMessage(data)
+	if err != truncatedMessage {
+		t.Fatalf("Expected truncated message, got %v/%v", a, err)
+	}
+}
+
 func TestCapture(t *testing.T) {
 	f, err := os.Open("radio.sample")
 	if err != nil {
