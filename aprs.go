@@ -21,11 +21,11 @@ func (d APRSData) IsValid() bool {
 }
 
 func (b Info) Type() PacketType {
-	t := byte(0)
+	t := PacketType(0)
 	if len(b) > 0 {
-		t = b[0]
+		t = PacketType(b[0])
 	}
-	return PacketType(t)
+	return t
 }
 
 func ParseAPRSData(i string) APRSData {
