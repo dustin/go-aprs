@@ -12,7 +12,7 @@ import (
 func TestUnreasonablySmall(t *testing.T) {
 	for i := 0; i < reasonableSize+1; i++ {
 		a, err := decodeMessage(make([]byte, i))
-		if err != shortMessage {
+		if err != errShortMsg {
 			t.Errorf("expected shortMessage error at %v, got %v/%v",
 				i, a, err)
 		}
@@ -22,7 +22,7 @@ func TestUnreasonablySmall(t *testing.T) {
 func TestTruncated(t *testing.T) {
 	data := make([]byte, 20)
 	a, err := decodeMessage(data)
-	if err != truncatedMessage {
+	if err != errTruncatedMsg {
 		t.Fatalf("Expected truncated message, got %v/%v", a, err)
 	}
 }

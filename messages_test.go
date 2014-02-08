@@ -25,8 +25,8 @@ func TestMessage(t *testing.T) {
 	if msg.Body != "testing notifications" {
 		t.Fatalf("Didn't get the message: %#v from %#v", msg.Body, v.Body)
 	}
-	if msg.Id != "10" {
-		t.Fatalf("Expected msg id 10, got %v", msg.Id)
+	if msg.ID != "10" {
+		t.Fatalf("Expected msg id 10, got %v", msg.ID)
 	}
 }
 
@@ -57,8 +57,8 @@ func TestThirdParty(t *testing.T) {
 	if msg.Body != "yo" {
 		t.Fatalf("Didn't get the message: %#v from %#v", msg.Body, v.Body)
 	}
-	if msg.Id != "AB}07" {
-		t.Fatalf("Expected msg id AB}07, got %v", msg.Id)
+	if msg.ID != "AB}07" {
+		t.Fatalf("Expected msg id AB}07, got %v", msg.ID)
 	}
 }
 
@@ -67,7 +67,7 @@ func TestMessageEncoding(t *testing.T) {
 	m := Message{Sender: AddressFromString("KG6HWE"),
 		Recipient: AddressFromString("KG6HWF"),
 		Body:      "yo",
-		Id:        "AB}07",
+		ID:        "AB}07",
 	}
 	if m.String() != exp {
 		t.Fatalf("Expected %v, got %v", exp, m.String())

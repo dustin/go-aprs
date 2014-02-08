@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// PacketType represents the type of information contains in an APRS packet.
 type PacketType byte
 
 var packetTypeNames = map[byte]string{
@@ -33,10 +34,12 @@ var packetTypeNames = map[byte]string{
 	'}':  "Third-party traffic",
 }
 
+// IsMessage is true if this PacketType represents a message.
 func (p PacketType) IsMessage() bool {
 	return p == ':'
 }
 
+// IsThirdParty is true if this PacketType is sent via third party.
 func (p PacketType) IsThirdParty() bool {
 	return p == '}'
 }

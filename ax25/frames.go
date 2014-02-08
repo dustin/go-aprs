@@ -1,4 +1,4 @@
-// AX.25 encoding and decoding lib.
+// Package ax25 provides AX.25 encoding and decoding lib.
 package ax25
 
 import (
@@ -13,8 +13,8 @@ import (
 
 const reasonableSize = 14
 
-var shortMessage = errors.New("short message")
-var truncatedMessage = errors.New("truncated message")
+var errShortMsg = errors.New("short message")
+var errTruncatedMsg = errors.New("truncated message")
 
 var setSSIDMask = byte(0x70 << 1)
 var clearSSIDMask = byte(0x30 << 1)
@@ -33,7 +33,7 @@ func parseAddr(in []byte) aprs.Address {
 
 func decodeMessage(frame []byte) (rv aprs.APRSData, err error) {
 	if len(frame) < reasonableSize+1 {
-		err = shortMessage
+		err = errShortMsg
 		return
 	}
 
@@ -51,7 +51,7 @@ func decodeMessage(frame []byte) (rv aprs.APRSData, err error) {
 	}
 
 	if len(frame) < 2 || frame[0] != 3 || frame[1] != 0xf0 {
-		err = truncatedMessage
+		err = errTruncatedMsg
 		return
 	}
 
@@ -60,12 +60,12 @@ func decodeMessage(frame []byte) (rv aprs.APRSData, err error) {
 	return
 }
 
-// An AX.25 message decoder.
+// Decoder is an AX.25 message decoder.
 type Decoder struct {
 	r *bufio.Reader
 }
 
-// Get the next message.
+// Next gets the next message.
 func (d *Decoder) Next() (aprs.APRSData, error) {
 	frame := []byte{}
 	var err error
@@ -78,7 +78,7 @@ func (d *Decoder) Next() (aprs.APRSData, error) {
 	return decodeMessage(frame)
 }
 
-// Get a new decoder over this reader.
+// NewDecoder gets a new decoder over this reader.
 func NewDecoder(r io.Reader) *Decoder {
 	return &Decoder{bufio.NewReader(r)}
 }
@@ -115,12 +115,12 @@ func toAX25(m aprs.APRSData, smask, dmask byte) []byte {
 	return b.Bytes()
 }
 
-// Encode an APRS command to an AX.25 frame.
+// EncodeAPRSCommand encodes an APRS command to an AX.25 frame.
 func EncodeAPRSCommand(m aprs.APRSData) []byte {
 	return toAX25(m, setSSIDMask, clearSSIDMask)
 }
 
-// Encode an APRS response to an AX.25 frame.
+// EncodeAPRSResponse encodes an APRS response to an AX.25 frame.
 func EncodeAPRSResponse(m aprs.APRSData) []byte {
 	return toAX25(m, clearSSIDMask, setSSIDMask)
 }

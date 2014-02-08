@@ -1,4 +1,4 @@
-// Amateur Packet Radio Service library.
+// Package aprs provides an Amateur Packet Radio Service messaging interface.
 package aprs
 
 import (
@@ -6,8 +6,10 @@ import (
 	"strings"
 )
 
+// Info represents the information payload of an APRS packet.
 type Info string
 
+// APRSData represents a complete, abstract, APRS frame.
 type APRSData struct {
 	Original string
 	Source   Address
@@ -16,10 +18,12 @@ type APRSData struct {
 	Body     Info
 }
 
+// IsValid is true if a message was correctly parsed.
 func (d APRSData) IsValid() bool {
 	return d.Original != ""
 }
 
+// Type of the message.
 func (b Info) Type() PacketType {
 	t := PacketType(0)
 	if len(b) > 0 {
@@ -28,6 +32,7 @@ func (b Info) Type() PacketType {
 	return t
 }
 
+// ParseAPRSData parses an APRS string into an APRSData struct.
 func ParseAPRSData(i string) APRSData {
 	parts := strings.SplitN(i, ":", 2)
 
@@ -47,15 +52,16 @@ func ParseAPRSData(i string) APRSData {
 		Body:   Info(parts[1])}
 }
 
-func (m APRSData) String() string {
-	b := bytes.NewBufferString(m.Source.String())
+// String forms an APRSData back into its proper wire format.
+func (d APRSData) String() string {
+	b := bytes.NewBufferString(d.Source.String())
 	b.WriteByte('>')
-	b.WriteString(m.Dest.String())
-	for _, p := range m.Path {
+	b.WriteString(d.Dest.String())
+	for _, p := range d.Path {
 		b.WriteByte(',')
 		b.WriteString(p.String())
 	}
 	b.WriteByte(':')
-	b.WriteString(string(m.Body))
+	b.WriteString(string(d.Body))
 	return b.String()
 }

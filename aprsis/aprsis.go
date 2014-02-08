@@ -1,4 +1,4 @@
-// Interface to APRS-IS service.
+// Package aprsis provides an interface to APRS-IS service.
 package aprsis
 
 import (
@@ -11,8 +11,8 @@ import (
 	"github.com/dustin/go-aprs"
 )
 
-var emptyMessage = errors.New("empty message")
-var invalidMessage = errors.New("invalid message")
+var errEmptyMsg = errors.New("empty message")
+var errInvalidMsg = errors.New("invalid message")
 
 // An APRSIS connection.
 type APRSIS struct {
@@ -21,7 +21,7 @@ type APRSIS struct {
 	infoHandler InfoHandler
 }
 
-// Handler for incoming info messages.
+// InfoHandler is a handler for incoming info messages.
 type InfoHandler interface {
 	Info(msg string)
 }
@@ -33,10 +33,10 @@ func (d dumbInfoHandlerT) Info(msg string) {
 
 var dumbInfoHandler dumbInfoHandlerT
 
-// Get the next APRS message from this connection.
+// Next returns the next APRS message from this connection.
 func (a *APRSIS) Next() (rv aprs.APRSData, err error) {
 	var line string
-	for err == nil || err == emptyMessage {
+	for err == nil || err == errEmptyMsg {
 		line, err = a.conn.ReadLine()
 		if err != nil {
 			return
@@ -49,26 +49,26 @@ func (a *APRSIS) Next() (rv aprs.APRSData, err error) {
 		} else if len(line) > 0 {
 			rv = aprs.ParseAPRSData(line)
 			if !rv.IsValid() {
-				err = invalidMessage
+				err = errInvalidMsg
 			}
 			return rv, err
 		}
 	}
 
-	return rv, emptyMessage
+	return rv, errEmptyMsg
 }
 
-// Set a writer that will receive all raw APRS-IS messages.
+// SetRawLog sets a writer that will receive all raw APRS-IS messages.
 func (a *APRSIS) SetRawLog(to io.Writer) {
 	a.rawLog = to
 }
 
-// Set a handler for APRS-IS Info messages.
+// SetInfoHandler set a handler for APRS-IS Info messages.
 func (a *APRSIS) SetInfoHandler(to InfoHandler) {
 	a.infoHandler = to
 }
 
-// Connect to an APRS-IS service.
+// Dial an APRS-IS service.
 func Dial(prot, addr string) (rv *APRSIS, err error) {
 	var conn *textproto.Conn
 	conn, err = textproto.Dial(prot, addr)
@@ -82,7 +82,7 @@ func Dial(prot, addr string) (rv *APRSIS, err error) {
 	}, nil
 }
 
-// Authenticate and optionally set a filter.
+// Auth authenticates and optionally set a filter.
 func (a *APRSIS) Auth(user, pass, filter string) error {
 	if filter != "" {
 		filter = fmt.Sprintf(" filter %s", filter)

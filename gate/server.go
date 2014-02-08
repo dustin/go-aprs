@@ -10,17 +10,18 @@ import (
 	"github.com/dustin/go-broadcast"
 )
 
-// Server filters limit the packets that are received over APRS-IS
+// A Filter limits the packets that are received over APRS-IS
 type Filter interface {
 	Matches(d aprs.APRSData) bool
 }
 
-// A filter made up of other filters
+// CompositeFilter is a filter made up of other filters
 type CompositeFilter struct {
 	Positive []Filter
 	Negative []Filter
 }
 
+// Matches satisfies Filter
 func (c *CompositeFilter) Matches(d aprs.APRSData) bool {
 	rv := false
 	for _, f := range c.Positive {
@@ -40,6 +41,7 @@ func (c *CompositeFilter) Matches(d aprs.APRSData) bool {
 	return rv
 }
 
+// A Point is a latitude/longitude pair representing a geographical location.
 type Point struct {
 	Lat float64
 	Lon float64
@@ -49,14 +51,17 @@ func d2r(d float64) float64 {
 	return d * 0.0174532925
 }
 
+// RadLat returns the latitude in radians.
 func (p Point) RadLat() float64 {
 	return d2r(p.Lat)
 }
 
+// RadLon returns the longitude to radians.
 func (p Point) RadLon() float64 {
 	return d2r(p.Lon)
 }
 
+// Distance returns the approximate distance from another point in kilometers.
 func (p Point) Distance(p2 Point) float64 {
 	r := 6371.01
 	return math.Acos((math.Sin(p.RadLat())*

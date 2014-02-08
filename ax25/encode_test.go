@@ -9,11 +9,11 @@ import (
 )
 
 const (
-	CHRISTMAS_MSG = "KG6HWF>APX200,WIDE1-1,WIDE2-1:=3722.1 N/12159.1 W-Merry Christmas!"
+	christmasMsg = "KG6HWF>APX200,WIDE1-1,WIDE2-1:=3722.1 N/12159.1 W-Merry Christmas!"
 )
 
 func TestKISS(t *testing.T) {
-	v := aprs.ParseAPRSData(CHRISTMAS_MSG)
+	v := aprs.ParseAPRSData(christmasMsg)
 	bc := EncodeAPRSCommand(v)
 	t.Logf("Command:\n" + hex.Dump(bc))
 

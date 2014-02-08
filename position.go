@@ -22,18 +22,24 @@ var uncompressedPositionRegexp = regexp.MustCompile(`([!=]|[/@\*]\d{6}[hz/])` +
 var compressedPositionRegexp = regexp.MustCompile("([!=/@])(" +
 	b91chars + "{4})(" + b91chars + "{4})(.)(..)(.)")
 
-var NoPositionFound = errors.New("No Positions Found")
-var TruncatedMessage = errors.New("Truncated message")
+// ErrNoPosition is returned when no geo positions could be found in a message.
+var ErrNoPosition = errors.New("no positions found")
 
+// ErrTruncatedMsg is returned when a message is incomplete.
+var ErrTruncatedMsg = errors.New("truncated message")
+
+// Symbol represents the map marker symbol for an object or station.
 type Symbol struct {
 	Table  byte
 	Symbol byte
 }
 
+// IsPrimary is true if this symbol is part of the primary symbol table.
 func (s Symbol) IsPrimary() bool {
 	return s.Table != '\\'
 }
 
+// Name is the name of the symbol.
 func (s Symbol) Name() (rv string) {
 	m := primarySymbolMap
 	if !s.IsPrimary() {
@@ -42,6 +48,7 @@ func (s Symbol) Name() (rv string) {
 	return m[s.Symbol]
 }
 
+// Glyph returns a textual representation of this Symbol.
 func (s Symbol) Glyph() string {
 	return symbolGlyphs[s.Name()]
 }
@@ -56,11 +63,13 @@ func (s Symbol) String() (rv string) {
 	return
 }
 
+// Velocity represents the course and speed of an object or station.
 type Velocity struct {
 	Course float64
 	Speed  float64
 }
 
+// Position contains all of the information necessary for placing an object on a map.
 type Position struct {
 	Lat       float64
 	Lon       float64
@@ -77,7 +86,7 @@ func (p Position) String() string {
 func uncompressedParser(input string) (pos Position, err error) {
 	// lat:8 symtab:1 lon:9 sym:1
 	if len(input) < 19 {
-		return pos, TruncatedMessage
+		return pos, ErrTruncatedMsg
 	}
 
 	pos.Symbol.Table = input[8]
@@ -123,7 +132,7 @@ func uncompressedParser(input string) (pos Position, err error) {
 		// Nearest degree
 		offby = 0.5
 	default:
-		return pos, fmt.Errorf("Invalid position ambiguity %d from %v",
+		return pos, fmt.Errorf("invalid position ambiguity %d from %v",
 			pos.Ambiguity, input)
 	}
 	if offby > 0 {
@@ -155,7 +164,7 @@ func positionUncompressed(input string) (pos Position, err error) {
 	found := uncompressedPositionRegexp.FindAllStringSubmatch(input, 10)
 	// {"=3722.1 N/12159.1 W-", "=", "37", "22", "1 ", "N", "/", "121", "59", "1 ", "W", "-", ""}
 	if len(found) == 0 || len(found[0]) != 13 {
-		return pos, NoPositionFound
+		return pos, ErrNoPosition
 	}
 	pos.Symbol.Table = found[0][6][0]
 	pos.Symbol.Symbol = found[0][11][0]
@@ -199,7 +208,7 @@ func positionUncompressed(input string) (pos Position, err error) {
 		// Nearest degree
 		offby = 0.5
 	default:
-		return pos, fmt.Errorf("Invalid position ambiguity %d from %v",
+		return pos, fmt.Errorf("invalid position ambiguity %d from %v",
 			pos.Ambiguity, found[0][0])
 	}
 	if offby > 0 {
@@ -243,7 +252,7 @@ func positionCompressed(input string) (pos Position, err error) {
 	found := compressedPositionRegexp.FindAllStringSubmatch(input, 10)
 	// {"/]\"4-}Foo !w6", "/", "]\"4-", "}Foo", " ", "!w", "6"}}
 	if len(found) == 0 || len(found[0]) != 7 {
-		return pos, NoPositionFound
+		return pos, ErrNoPosition
 	}
 
 	// Lat = 90 - ((y1-33) x 91^3 + (y2-33) x 91^2 + (y3-33) x 91 + y4-33) / 380926
@@ -276,7 +285,7 @@ func positionOld(t string) (pos Position, err error) {
 
 func compressedParser(input string) (pos Position, err error) {
 	if len(input) < 12 {
-		return pos, TruncatedMessage
+		return pos, ErrTruncatedMsg
 	}
 	pos.Symbol.Table = input[0]
 	pos.Symbol.Symbol = input[9]
@@ -301,7 +310,7 @@ func newParser(input string, uncompressed bool) (pos Position, err error) {
 	return
 }
 
-// Get the position of the message.
+// Position gets the position of the message.
 func (body Info) Position() (pos Position, err error) {
 	switch body.Type() {
 	case '!', '=':
@@ -313,7 +322,7 @@ func (body Info) Position() (pos Position, err error) {
 	case ';':
 		t := string(body)
 		if len(t) < 19 {
-			return pos, TruncatedMessage
+			return pos, ErrTruncatedMsg
 		}
 		return newParser(t[18:], unicode.IsDigit(rune(body[18])))
 		// t := string(body[1:])

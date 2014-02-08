@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	CHRISTMAS_MSG = "KG6HWF>APX200,WIDE1-1,WIDE2-1:=3722.1 N/12159.1 W-Merry Christmas!"
+	christmasMsg = "KG6HWF>APX200,WIDE1-1,WIDE2-1:=3722.1 N/12159.1 W-Merry Christmas!"
 )
 
 const SAMPLE2 = `K7FED-1>APNX01,qAR,W6MSU-7:!3739.12N112132.05W#PHG5750 W1, K7FED FILL-IN LLNL S300`
@@ -86,7 +86,7 @@ func TestCallPass(t *testing.T) {
 }
 
 func TestAPRS(t *testing.T) {
-	v := ParseAPRSData(CHRISTMAS_MSG)
+	v := ParseAPRSData(christmasMsg)
 	assert(t, "Source", v.Source.String(), "KG6HWF")
 	assert(t, "Dest", v.Dest.String(), "APX200")
 	assert(t, "len(Path)", len(v.Path), 2)
@@ -105,7 +105,7 @@ func TestAPRS(t *testing.T) {
 	assert(t, "table", byte('/'), pos.Symbol.Table)
 	assert(t, "symbol", byte('-'), pos.Symbol.Symbol)
 
-	assert(t, "String()", v.String(), CHRISTMAS_MSG)
+	assert(t, "String()", v.String(), christmasMsg)
 }
 
 func TestInvalid(t *testing.T) {

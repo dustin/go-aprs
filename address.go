@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// An APRS address (callsign with optional SSID)
+// An Address for APRS (callsign with optional SSID)
 type Address struct {
 	Call string
 	SSID uint8
@@ -21,7 +21,7 @@ func (a Address) String() string {
 	return rv
 }
 
-// Callpass algorithm for APRS-IS
+// CallPass algorithm for APRS-IS
 func (a Address) CallPass() (rv int16) {
 	rv = 0x73e2
 	for i := 0; i < len(a.Call); {
@@ -43,7 +43,7 @@ func parseAddresses(addrs []string) []Address {
 	return rv
 }
 
-// Build an Addrss object from a string.
+// AddressFromString builds an Addrss object from a string.
 func AddressFromString(s string) Address {
 	parts := strings.Split(s, "-")
 	rv := Address{Call: parts[0]}

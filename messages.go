@@ -5,14 +5,16 @@ import (
 	"strings"
 )
 
+// A Message is a message from an APRS address to another.
 type Message struct {
 	Sender    Address
 	Recipient Address
 	Body      string
-	Id        string
+	ID        string
 	Parsed    bool
 }
 
+// Message returns the message from an APRSData frame.
 func (a APRSData) Message() (rv Message) {
 	// Find source of third party
 	for a.Body.Type().IsThirdParty() && len(a.Body) > 11 {
@@ -28,7 +30,7 @@ func (a APRSData) Message() (rv Message) {
 		parts := strings.SplitN(string(a.Body[11:]), "{", 2)
 		rv.Body = parts[0]
 		if len(parts) > 1 {
-			rv.Id = parts[1]
+			rv.ID = parts[1]
 		}
 
 		rv.Parsed = true
@@ -38,8 +40,8 @@ func (a APRSData) Message() (rv Message) {
 
 func (m Message) String() string {
 	idstring := ""
-	if m.Id != "" {
-		idstring = "{" + m.Id
+	if m.ID != "" {
+		idstring = "{" + m.ID
 	}
 	return fmt.Sprintf(":%-9s:%s%s", m.Recipient.String(),
 		m.Body, idstring)

@@ -18,7 +18,7 @@ import (
 	"github.com/rem7/goprowl"
 )
 
-const max_retries = 10
+const maxRetries = 10
 
 type notifier struct {
 	Name     string
@@ -92,7 +92,7 @@ func notifyWebhook(n notifier, note notification) (err error) {
 
 func (n notifier) notify(note notification) {
 	log.Printf("Sending notification:  %v", note)
-	for i := 0; i < max_retries; i++ {
+	for i := 0; i < maxRetries; i++ {
 		if err := notifyFuns[n.Driver](n, note); err == nil {
 			break
 		} else {
