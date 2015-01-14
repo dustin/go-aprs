@@ -19,11 +19,12 @@ import (
 	"github.com/dustin/go-rs232"
 )
 
-var call, pass, filter, server, portString, rawlog string
+var call, pass, filter, server, portString, httpAddr, rawlog string
 var logWriter = io.Writer(ioutil.Discard)
 
 func init() {
 	flag.StringVar(&server, "server", "second.aprs.net:14580", "APRS-IS upstream")
+	flag.StringVar(&httpAddr, "http", ":7373", "HTTP bind address")
 	flag.StringVar(&portString, "port", "", "Serial port KISS thing")
 	flag.StringVar(&call, "call", "", "Your callsign (for APRS-IS)")
 	flag.StringVar(&pass, "pass", "", "Your call pass (for APRS-IS)")
@@ -153,5 +154,5 @@ func main() {
 
 	go startIS(serverNet, serverAddr, broadcaster)
 
-	log.Fatal(http.ListenAndServe(":7373", nil))
+	log.Fatal(http.ListenAndServe(httpAddr, nil))
 }
