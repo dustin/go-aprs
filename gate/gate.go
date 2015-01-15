@@ -46,8 +46,8 @@ func reporter(b broadcast.Broadcaster) {
 			log.Printf("%s sent a ``%v'' to %s:  ``%s'' at %v",
 				msg.Source, msg.Body.Type(), msg.Dest, msg.Body, pos)
 		} else {
-			log.Printf("%s sent a ``%v'' to %s:  ``%s''", msg.Source,
-				msg.Body.Type(), msg.Dest, msg.Body)
+			log.Printf("%s sent a ``%v'' to %s:  ``%s'' -- err=%v", msg.Source,
+				msg.Body.Type(), msg.Dest, msg.Body, err)
 		}
 	}
 }
