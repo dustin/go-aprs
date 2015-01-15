@@ -19,20 +19,20 @@ import (
 	"github.com/dustin/go-rs232"
 )
 
-var call, pass, filter, server, portString, httpAddr, rawlog string
-var logWriter = io.Writer(ioutil.Discard)
+var (
+	server     = flag.String("server", "second.aprs.net:14580", "APRS-IS upstream")
+	httpAddr   = flag.String("http", ":7373", "HTTP bind address")
+	portString = flag.String("port", "", "Serial port KISS thing")
+	call       = flag.String("call", "", "Your callsign (for APRS-IS)")
+	pass       = flag.String("pass", "", "Your call pass (for APRS-IS)")
+	filter     = flag.String("filter", "", "Optional filter for APRS-IS server")
+	rawlog     = flag.String("rawlog", "", "Path to raw log messages")
+)
 
-func init() {
-	flag.StringVar(&server, "server", "second.aprs.net:14580", "APRS-IS upstream")
-	flag.StringVar(&httpAddr, "http", ":7373", "HTTP bind address")
-	flag.StringVar(&portString, "port", "", "Serial port KISS thing")
-	flag.StringVar(&call, "call", "", "Your callsign (for APRS-IS)")
-	flag.StringVar(&pass, "pass", "", "Your call pass (for APRS-IS)")
-	flag.StringVar(&filter, "filter", "", "Optional filter for APRS-IS server")
-	flag.StringVar(&rawlog, "rawlog", "", "Path to log raw messages")
-}
-
-var radio io.ReadWriteCloser
+var (
+	logWriter = io.Writer(ioutil.Discard)
+	radio     io.ReadWriteCloser
+)
 
 func reporter(b broadcast.Broadcaster) {
 	ch := make(chan interface{})
@@ -60,15 +60,15 @@ func (*loggingInfoHandler) Info(msg string) {
 }
 
 func netClient(b broadcast.Broadcaster) error {
-	is, err := aprsis.Dial("tcp", server)
+	is, err := aprsis.Dial("tcp", *server)
 	if err != nil {
 		return err
 	}
 
-	is.Auth(call, pass, filter)
+	is.Auth(*call, *pass, *filter)
 
-	if rawlog != "" {
-		logWriter, err := os.OpenFile(rawlog,
+	if *rawlog != "" {
+		logWriter, err := os.OpenFile(*rawlog,
 			os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 		if err != nil {
 			return err
@@ -88,12 +88,12 @@ func netClient(b broadcast.Broadcaster) error {
 }
 
 func readNet(b broadcast.Broadcaster) {
-	if call == "" {
+	if *call == "" {
 		fmt.Fprintf(os.Stderr, "Your callsign is required.\n")
 		flag.Usage()
 		os.Exit(1)
 	}
-	if pass == "" {
+	if *pass == "" {
 		fmt.Fprintf(os.Stderr, "Your call pass is required.\n")
 		flag.Usage()
 		os.Exit(1)
@@ -108,7 +108,7 @@ func readNet(b broadcast.Broadcaster) {
 
 func readSerial(b broadcast.Broadcaster) {
 	var err error
-	radio, err = rs232.OpenPort(portString, 57600, rs232.S_8N1)
+	radio, err = rs232.OpenPort(*portString, 57600, rs232.S_8N1)
 	if err != nil {
 		log.Fatalf("Error opening port: %s", err)
 	}
@@ -144,15 +144,15 @@ func main() {
 	// go reporter(broadcaster)
 	go notify(broadcaster)
 
-	if server != "" {
+	if *server != "" {
 		go readNet(broadcaster)
 	}
 
-	if portString != "" {
+	if *portString != "" {
 		go readSerial(broadcaster)
 	}
 
 	go startIS(serverNet, serverAddr, broadcaster)
 
-	log.Fatal(http.ListenAndServe(httpAddr, nil))
+	log.Fatal(http.ListenAndServe(*httpAddr, nil))
 }
