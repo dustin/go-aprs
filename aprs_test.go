@@ -86,7 +86,7 @@ func TestCallPass(t *testing.T) {
 }
 
 func TestAPRS(t *testing.T) {
-	v := ParseAPRSData(christmasMsg)
+	v := ParseFrame(christmasMsg)
 	assert(t, "Source", v.Source.String(), "KG6HWF")
 	assert(t, "Dest", v.Dest.String(), "APX200")
 	assert(t, "len(Path)", len(v.Path), 2)
@@ -109,7 +109,7 @@ func TestAPRS(t *testing.T) {
 }
 
 func TestInvalid(t *testing.T) {
-	v := ParseAPRSData("Invalid")
+	v := ParseFrame("Invalid")
 	if v.IsValid() {
 		t.Fatalf("Expected invalid data out of the parse")
 	}
@@ -118,7 +118,7 @@ func TestInvalid(t *testing.T) {
 	assert(t, "len(Path)", len(v.Path), 0)
 	assert(t, "Body", string(v.Body), "")
 
-	v = ParseAPRSData("Invalid:Thing")
+	v = ParseFrame("Invalid:Thing")
 	if v.IsValid() {
 		t.Fatalf("Expected invalid data out of the parse")
 	}
@@ -130,7 +130,7 @@ func TestInvalid(t *testing.T) {
 
 func TestSamples(t *testing.T) {
 	for _, s := range samples {
-		v := ParseAPRSData(s.src)
+		v := ParseFrame(s.src)
 		pos, err := v.Body.Position()
 		if err != nil {
 			t.Fatalf("Error getting position from %v: %v", s.src, err)
@@ -210,7 +210,7 @@ func TestFAP(t *testing.T) {
 
 	for _, sample := range samples {
 		if sample.Failed != 1 {
-			v := ParseAPRSData(sample.Src)
+			v := ParseFrame(sample.Src)
 			assert(t, "Source", v.Source.String(), sample.Result["srccallsign"])
 			assert(t, "Dest", v.Dest.String(), sample.Result["dstcallsign"])
 			assert(t, "Body", string(v.Body), sample.Result["body"])
@@ -294,7 +294,7 @@ func BenchmarkMessages(b *testing.B) {
 	var read int64
 	for i := 0; i < b.N; i++ {
 		src := largeSample[i%len(largeSample)]
-		ParseAPRSData(src)
+		ParseFrame(src)
 		read += int64(len(src))
 	}
 	b.SetBytes(read / int64(b.N))
@@ -305,7 +305,7 @@ func BenchmarkPositionsFromLog(b *testing.B) {
 	var read int64
 	for i := 0; i < b.N; i++ {
 		src := largeSample[i%len(largeSample)]
-		msg := ParseAPRSData(src)
+		msg := ParseFrame(src)
 		msg.Body.Position()
 		read += int64(len(src))
 	}

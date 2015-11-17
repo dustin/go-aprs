@@ -10,7 +10,7 @@ const (
 )
 
 func TestMessage(t *testing.T) {
-	v := ParseAPRSData(MESSAGE)
+	v := ParseFrame(MESSAGE)
 	msg := v.Message()
 
 	if !msg.Parsed {
@@ -31,7 +31,7 @@ func TestMessage(t *testing.T) {
 }
 
 func TestBrokenMessage(t *testing.T) {
-	a := APRSData{Body: ":"}
+	a := Frame{Body: ":"}
 	msg := a.Message()
 	if msg.Parsed {
 		t.Fatalf("Expected to fail to parse broken message: %v", msg)
@@ -39,7 +39,7 @@ func TestBrokenMessage(t *testing.T) {
 }
 
 func TestThirdParty(t *testing.T) {
-	v := ParseAPRSData(MESSAGE2)
+	v := ParseFrame(MESSAGE2)
 	if !v.Body.Type().IsThirdParty() {
 		t.Fatalf("This should be third party traffic: %#v", v.Body)
 	}

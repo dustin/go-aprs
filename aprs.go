@@ -9,8 +9,8 @@ import (
 // Info represents the information payload of an APRS packet.
 type Info string
 
-// APRSData represents a complete, abstract, APRS frame.
-type APRSData struct {
+// Frame represents a complete, abstract, APRS frame.
+type Frame struct {
 	Original string
 	Source   Address
 	Dest     Address
@@ -19,7 +19,7 @@ type APRSData struct {
 }
 
 // IsValid is true if a message was correctly parsed.
-func (d APRSData) IsValid() bool {
+func (d Frame) IsValid() bool {
 	return d.Original != ""
 }
 
@@ -32,28 +32,28 @@ func (b Info) Type() PacketType {
 	return t
 }
 
-// ParseAPRSData parses an APRS string into an APRSData struct.
-func ParseAPRSData(i string) APRSData {
+// ParseFrame parses an APRS string into an Frame struct.
+func ParseFrame(i string) Frame {
 	parts := strings.SplitN(i, ":", 2)
 
 	if len(parts) != 2 {
-		return APRSData{}
+		return Frame{}
 	}
 	srcparts := strings.SplitN(parts[0], ">", 2)
 	if len(srcparts) < 2 {
-		return APRSData{}
+		return Frame{}
 	}
 	pathparts := strings.Split(srcparts[1], ",")
 
-	return APRSData{Original: i,
+	return Frame{Original: i,
 		Source: AddressFromString(srcparts[0]),
 		Dest:   AddressFromString(pathparts[0]),
 		Path:   parseAddresses(pathparts[1:]),
 		Body:   Info(parts[1])}
 }
 
-// String forms an APRSData back into its proper wire format.
-func (d APRSData) String() string {
+// String forms an Frame back into its proper wire format.
+func (d Frame) String() string {
 	b := bytes.NewBufferString(d.Source.String())
 	b.WriteByte('>')
 	b.WriteString(d.Dest.String())

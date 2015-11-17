@@ -31,7 +31,7 @@ func parseAddr(in []byte) aprs.Address {
 	return rv
 }
 
-func decodeMessage(frame []byte) (rv aprs.APRSData, err error) {
+func decodeMessage(frame []byte) (rv aprs.Frame, err error) {
 	if len(frame) < reasonableSize+1 {
 		err = errShortMsg
 		return
@@ -66,13 +66,13 @@ type Decoder struct {
 }
 
 // Next gets the next message.
-func (d *Decoder) Next() (aprs.APRSData, error) {
+func (d *Decoder) Next() (aprs.Frame, error) {
 	frame := []byte{}
 	var err error
 	for len(frame) < reasonableSize {
 		frame, err = d.r.ReadBytes(byte(0xc0))
 		if err != nil {
-			return aprs.APRSData{}, err
+			return aprs.Frame{}, err
 		}
 	}
 	return decodeMessage(frame)
@@ -95,7 +95,7 @@ func addressEncode(a aprs.Address, ssidMask byte) []byte {
 	return rv
 }
 
-func toAX25(m aprs.APRSData, smask, dmask byte) []byte {
+func toAX25(m aprs.Frame, smask, dmask byte) []byte {
 	b := &bytes.Buffer{}
 	b.Write(addressEncode(m.Dest, dmask))
 	mask := smask
@@ -116,11 +116,11 @@ func toAX25(m aprs.APRSData, smask, dmask byte) []byte {
 }
 
 // EncodeAPRSCommand encodes an APRS command to an AX.25 frame.
-func EncodeAPRSCommand(m aprs.APRSData) []byte {
+func EncodeAPRSCommand(m aprs.Frame) []byte {
 	return toAX25(m, setSSIDMask, clearSSIDMask)
 }
 
 // EncodeAPRSResponse encodes an APRS response to an AX.25 frame.
-func EncodeAPRSResponse(m aprs.APRSData) []byte {
+func EncodeAPRSResponse(m aprs.Frame) []byte {
 	return toAX25(m, clearSSIDMask, setSSIDMask)
 }

@@ -139,9 +139,9 @@ func notify(b broadcast.Broadcaster) {
 	c := cache.New(time.Hour, time.Minute)
 
 	for msgi := range ch {
-		msg := msgi.(aprs.APRSData)
+		msg := msgi.(aprs.Frame)
 		for msg.Body.Type().IsThirdParty() && len(msg.Body) > 1 {
-			msg = aprs.ParseAPRSData(string(msg.Body[1:]))
+			msg = aprs.ParseFrame(string(msg.Body[1:]))
 		}
 		k := fmt.Sprintf("%v %v %v", msg.Dest, msg.Source, msg.Body)
 

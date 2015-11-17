@@ -12,7 +12,7 @@ import (
 
 // A Filter limits the packets that are received over APRS-IS
 type Filter interface {
-	Matches(d aprs.APRSData) bool
+	Matches(d aprs.Frame) bool
 }
 
 // CompositeFilter is a filter made up of other filters
@@ -22,7 +22,7 @@ type CompositeFilter struct {
 }
 
 // Matches satisfies Filter
-func (c *CompositeFilter) Matches(d aprs.APRSData) bool {
+func (c *CompositeFilter) Matches(d aprs.Frame) bool {
 	rv := false
 	for _, f := range c.Positive {
 		if f.Matches(d) {

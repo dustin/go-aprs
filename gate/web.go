@@ -38,7 +38,7 @@ func sendMessage(rw http.ResponseWriter, r *http.Request) {
 			log.Fatalf("Expected to write two bytes, wrote %v", n)
 		}
 
-		msg := aprs.APRSData{
+		msg := aprs.Frame{
 			Source: aprs.AddressFromString(src),
 			Dest:   aprs.AddressFromString(dest),
 			Path: []aprs.Address{

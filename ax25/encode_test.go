@@ -13,7 +13,7 @@ const (
 )
 
 func TestKISS(t *testing.T) {
-	v := aprs.ParseAPRSData(christmasMsg)
+	v := aprs.ParseFrame(christmasMsg)
 	bc := EncodeAPRSCommand(v)
 	t.Logf("Command:\n" + hex.Dump(bc))
 

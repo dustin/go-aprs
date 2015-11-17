@@ -14,11 +14,11 @@ type Message struct {
 	Parsed    bool
 }
 
-// Message returns the message from an APRSData frame.
-func (a APRSData) Message() (rv Message) {
+// Message returns the message from an Frame frame.
+func (a Frame) Message() (rv Message) {
 	// Find source of third party
 	for a.Body.Type().IsThirdParty() && len(a.Body) > 11 {
-		a = ParseAPRSData(string(a.Body[1:]))
+		a = ParseFrame(string(a.Body[1:]))
 	}
 
 	if a.Body.Type().IsMessage() {

@@ -40,7 +40,7 @@ func reporter(b broadcast.Broadcaster) {
 	defer b.Unregister(ch)
 
 	for msgi := range ch {
-		msg := msgi.(aprs.APRSData)
+		msg := msgi.(aprs.Frame)
 		pos, err := msg.Body.Position()
 		if err == nil {
 			log.Printf("%s sent a ``%v'' to %s:  ``%s'' at %v",
