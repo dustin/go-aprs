@@ -58,7 +58,7 @@ func (s Symbol) String() (rv string) {
 	if g == "" {
 		rv = fmt.Sprintf("{%c%c: %s}", s.Table, s.Symbol, s.Name())
 	} else {
-		rv = fmt.Sprintf("{%c%c: %s -  %s}", s.Table, s.Symbol, s.Name(), g)
+		rv = fmt.Sprintf("{%c%c: %s - %s}", s.Table, s.Symbol, s.Name(), g)
 	}
 	return
 }
