@@ -18,3 +18,11 @@ func TestSymbol(t *testing.T) {
 		}
 	}
 }
+
+func TestPosition(t *testing.T) {
+	p := Position{37, -121, 2, Velocity{15, 31}, Symbol{'/', 'a'}}
+	exp := "{lat=37, lon=-121, amb=2, sym={/a: Ambulance - \u2620}}"
+	if p.String() != exp {
+		t.Errorf("for %#v, got %v, want %v", p, p, exp)
+	}
+}
