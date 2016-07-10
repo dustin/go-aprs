@@ -242,14 +242,6 @@ func TestFAP(t *testing.T) {
 	t.Logf("Misunderstood %v", misunderstood)
 }
 
-func TestDecodeBase91(t *testing.T) {
-	v := decodeBase91([]byte("<*e7"))
-	expected := 20346417 + 74529 + 6188 + 22
-	if v != expected {
-		t.Fatalf("Expected %v, got %v", expected, v)
-	}
-}
-
 func getSampleLines(path string) []string {
 	file, err := os.Open(path)
 	if err != nil {
