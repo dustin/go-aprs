@@ -47,3 +47,16 @@ func TestDecodeBase91(t *testing.T) {
 		}
 	}
 }
+
+func TestPositionParsing(t *testing.T) {
+	x, err := compressedParser("123")
+	if err == nil {
+		t.Errorf("Expected error on three bytes compressed, got %v", x)
+	}
+
+	x, err = uncompressedParser("123")
+	if err == nil {
+		t.Errorf("Expected error on three bytes uncompressed, got %v", x)
+	}
+
+}
