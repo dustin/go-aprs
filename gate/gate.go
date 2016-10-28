@@ -27,6 +27,7 @@ var (
 	pass       = flag.String("pass", "", "Your call pass (for APRS-IS)")
 	filter     = flag.String("filter", "", "Optional filter for APRS-IS server")
 	rawlog     = flag.String("rawlog", "", "Path to raw log messages")
+	wdTime     = flag.Duration("watchdog_time", 5*time.Minute, "Close connection if a message hasn't been heard in this long")
 )
 
 var (
@@ -78,14 +79,14 @@ func netClient(b broadcast.Broadcaster) error {
 
 	is.SetInfoHandler(&loggingInfoHandler{})
 
-	wd := time.AfterFunc(time.Minute*5, func() { is.Close() })
+	wd := time.AfterFunc(*wdTime, func() { is.Close() })
 	for {
 		msg, err := is.Next()
 		if err != nil {
 			return err
 		}
 		b.Submit(msg)
-		wd.Reset(time.Minute * 5)
+		wd.Reset(*wdTime)
 	}
 }
 
