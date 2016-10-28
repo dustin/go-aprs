@@ -78,12 +78,14 @@ func netClient(b broadcast.Broadcaster) error {
 
 	is.SetInfoHandler(&loggingInfoHandler{})
 
+	wd := time.AfterFunc(time.Minute*5, func() { is.Close() })
 	for {
 		msg, err := is.Next()
 		if err != nil {
 			return err
 		}
 		b.Submit(msg)
+		wd.Reset(time.Minute * 5)
 	}
 }
 

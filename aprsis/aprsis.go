@@ -82,6 +82,11 @@ func Dial(prot, addr string) (rv *APRSIS, err error) {
 	}, nil
 }
 
+// Close disconnects from the underlying textproto conn.
+func (a *APRSIS) Close() error {
+	return a.conn.Close()
+}
+
 // Auth authenticates and optionally set a filter.
 func (a *APRSIS) Auth(user, pass, filter string) error {
 	if filter != "" {
