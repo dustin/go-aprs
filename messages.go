@@ -2,6 +2,7 @@ package aprs
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -45,4 +46,10 @@ func (m Message) String() string {
 	}
 	return fmt.Sprintf(":%-9s:%s%s", m.Recipient.String(),
 		m.Body, idstring)
+}
+
+var ackPattern = regexp.MustCompile(`^ack([A-z0-9]{1,5})`)
+
+func (m Message) IsACK() bool {
+	return ackPattern.MatchString(m.Body)
 }

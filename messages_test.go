@@ -7,6 +7,7 @@ import (
 const (
 	MESSAGE  = "KG6HWF-9>APDR12,TCPIP*,qAC,T2SPAIN2::KG6HWF   :testing notifications{10"
 	MESSAGE2 = "K7FED-10>APJI23,WR6ABD*:}KG6HWE>APOA00,TCPIP,K7FED-10*::KG6HWF   :yo{AB}07"
+	ACKED    = "KG6HWF-5>APDR13,TCPIP*,qAC,T2PERTH::KG6HWF   :ack01}1"
 )
 
 func TestMessage(t *testing.T) {
@@ -27,6 +28,15 @@ func TestMessage(t *testing.T) {
 	}
 	if msg.ID != "10" {
 		t.Fatalf("Expected msg id 10, got %v", msg.ID)
+	}
+}
+
+func TestAcked(t *testing.T) {
+	v := ParseFrame(ACKED)
+	msg := v.Message()
+
+	if !msg.IsACK() {
+		t.Fatalf("Expected %v to be interpreted as an ACK", ACKED)
 	}
 }
 

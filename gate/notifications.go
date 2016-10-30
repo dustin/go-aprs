@@ -158,7 +158,7 @@ func notify(b broadcast.Broadcaster) {
 			m := msg.Message()
 			if n.To == msg.Dest.Call {
 				go n.notify(note)
-			} else if m.Parsed && m.Recipient.Call == n.To && m.Body != "ack" {
+			} else if m.Parsed && m.Recipient.Call == n.To && !m.IsACK() {
 				note.Msg = m.Body
 				go n.notify(note)
 			}
