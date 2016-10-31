@@ -50,6 +50,7 @@ func (m Message) String() string {
 
 var ackPattern = regexp.MustCompile(`^ack([A-z0-9]{1,5})`)
 
+// IsACK returns true if this message is an acknowledgment to another message.
 func (m Message) IsACK() bool {
 	return ackPattern.MatchString(m.Body)
 }
