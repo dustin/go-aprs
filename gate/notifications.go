@@ -153,7 +153,7 @@ func notify(b broadcast.Broadcaster) {
 
 		c.Set(k, "hi", 0)
 
-		note := notification{msg.Body.Type().String(), string(msg.Body)}
+		note := notification{msg.Body.Type().String(), fmt.Sprintf("%s: %s", msg.Source, msg.Body)}
 		for _, n := range notifiers {
 			m := msg.Message()
 			if n.To == msg.Dest.Call {
