@@ -140,6 +140,7 @@ func notify(b broadcast.Broadcaster) {
 
 	for msgi := range ch {
 		msg := msgi.(aprs.Frame)
+		sender := msg.Source
 		for msg.Body.Type().IsThirdParty() && len(msg.Body) > 1 {
 			msg = aprs.ParseFrame(string(msg.Body[1:]))
 		}
@@ -153,7 +154,7 @@ func notify(b broadcast.Broadcaster) {
 
 		c.Set(k, "hi", 0)
 
-		note := notification{msg.Body.Type().String(), fmt.Sprintf("%s: %s", msg.Source, msg.Body)}
+		note := notification{msg.Body.Type().String(), fmt.Sprintf("%s: %s", sender, msg.Body)}
 		for _, n := range notifiers {
 			m := msg.Message()
 			if n.To == msg.Dest.Call {
