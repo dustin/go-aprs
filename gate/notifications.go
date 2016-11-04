@@ -155,12 +155,12 @@ func notify(b broadcast.Broadcaster) {
 		c.Set(k, "hi", 0)
 
 		note := notification{msg.Body.Type().String(), fmt.Sprintf("%s: %s", sender, msg.Body)}
+		m := msg.Message()
+		if m.Parsed {
+			note.Msg = fmt.Sprintf("%s: %s", sender, m.Body)
+		}
 		for _, n := range notifiers {
-			m := msg.Message()
-			if n.To == msg.Dest.Call {
-				go n.notify(note)
-			} else if m.Parsed && m.Recipient.Call == n.To && !m.IsACK() {
-				note.Msg = m.Body
+			if n.To == msg.Dest.Call || (m.Parsed && m.Recipient.Call == n.To && !m.IsACK()) {
 				go n.notify(note)
 			}
 		}
