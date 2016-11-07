@@ -1,0 +1,13 @@
+[
+	{
+		"name": "NMA",
+		"driver": "nma",
+		"to": "YOURCALLSIGN",
+		"config": {
+			"apikey": "YOURAPIKEY",
+			"application": "aprs",
+			"priority": "0"
+		}
+	}
+]
+
