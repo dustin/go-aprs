@@ -23,16 +23,16 @@ REM   ------   ------ -----    -----------     ------ -----    -----------
         #,      BD,     2,      Digi,           OD,     2,      No. Digi
         $,      BE,     3,      Phone,          OE,     3,      Bank
         %,      BF,     4,      DX Cluster,     OF,     4,      No Symbol
-        &,      BG,     5,      HF Gateway,     OG,     5,      No. Diam'd
+        &,      BG,     5,      HF Gateway,     OG,     5,      No. Diam'd, Ⓖ,
         ',      BH,     6,      Plane sm,       OH,     6,      Crash site
         (,      BI,     7,      Mob Sat Stn,    OI,     7,      Cloudy
         ),      BJ,     8,      WheelChair,     OJ,     8,      MEO
         *,      BK,     9,      Snowmobile,     OK,     9,      Snow
         +,      BL,     10,     Red Cross,      OL,     10,     Church
         ,,      BM,     11,     Boy Scout,      OM,     11,     Girl Scout
-        -,      BN,     12,     Home,           ON,     12,     Home (HF)
+        -,      BN,     12,     Home,           ON,     12,     Home (HF), ⌂,
         .,      BO,     13,     X,              OO,     13,     UnknownPos
-        /,      BP,     14,     Red Dot,        OP,     14,     Destination
+        /,      BP,     14,     Red Dot,        OP,     14,     Destination, ·,
         0,      P0,     15,     Circle (0),     A0,     15,     No. Circle
         1,      P1,     16,     Circle (1),     A1,     16,     No Symbol
         2,      P2,     17,     Circle (2),     A2,     17,     No Symbol
@@ -65,7 +65,7 @@ REM   ------   ------ -----    -----------     ------ -----    -----------
         M,      PM,     44,     MacAPRS,        AM,     44,     No Symbol
         N,      PN,     45,     NTS Stn,        AN,     45,     Nav Buoy
         O,      PO,     46,     Balloon,        AO,     46,     Rocket
-        P,      PP,     47,     Police,         AP,     47,     Parking  
+        P,      PP,     47,     Police,         AP,     47,     Parking
         Q,      PQ,     48,     TBD,            AQ,     48,     Quake
         R,      PR,     49,     Rec Veh'le,     AR,     49,     Restaurant
         S,      PS,     50,     Shuttle,        AS,     50,     Sat/Pacsat
@@ -80,9 +80,9 @@ REM   ------   ------ -----    -----------     ------ -----    -----------
         \,      HT,     59,     Triangle,       DT,     59,     No Symbol
         ],      HU,     60,     PBBS,           DU,     60,     No Symbol
         ^,      HV,     61,     Plane lrge,     DV,     61,     No. Plane
-        _,      HW,     62,     WX Station,     DW,     62,     No. WX Stn
+        _,      HW,     62,     WX Station,     DW,     62,     No. WX Stn, ☀,
         ` + "`" + `,      HX,     63,     Dish Ant.,      DX,     63,     Rain
-        a,      LA,     64,     Ambulance,      SA,     64,     No. Diamond
+        a,      LA,     64,     Ambulance,      SA,     64,     No. Diamond, ☠,
         b,      LB,     65,     Bike,           SB,     65,     Dust blwng
         c,      LC,     66,     ICP,            SC,     66,     No. CivDef
         d,      LD,     67,     Fire Station,   SD,     67,     DX Spot
@@ -99,14 +99,14 @@ REM   ------   ------ -----    -----------     ------ -----    -----------
         o,      LO,     78,     EOC,            SO,     78,     Circle sm
         p,      LP,     79,     Rover,          SP,     79,     Part Cloud
         q,      LQ,     80,     Grid squ.,      SQ,     80,     No Symbol
-        r,      LR,     81,     Antenna,        SR,     81,     Restrooms
+        r,      LR,     81,     Antenna,        SR,     81,     Restrooms, ⏉,
         s,      LS,     82,     Power Boat,     SS,     82,     No. Boat
         t,      LT,     83,     Truck Stop,     ST,     83,     Tornado
         u,      LU,     84,     Truck 18wh,     SU,     84,     No. Truck
         v,      LV,     85,     Van,            SV,     85,     No. Van
         w,      LW,     86,     Water Stn,      SW,     86,     Flooding
         x,      LX,     87,     XAPRS,          SX,     87,     No Symbol
-        y,      LY,     88,     Yagi,           SY,     88,     Sky Warn
+        y,      LY,     88,     Yagi,           SY,     88,     Sky Warn, ⏉,
         z,      LZ,     89,     Shelter,        SZ,     89,     No. Shelter
         {,      J1,     90,     No Symbol,      Q1,     90,     Fog
         |,      J2,     91,     TNC Stream Sw,  Q2,     91,     TNC Stream SW
@@ -114,15 +114,7 @@ REM   ------   ------ -----    -----------     ------ -----    -----------
         ~,      J4,     93,     TNC Stream Sw,  Q4,     93,     TNC Stream SW
 `
 
-var symbolGlyphs = map[string]string{
-	"Antenna":    "\u23C9",
-	"Yagi":       "\u23C9",
-	"Home":       "\u2302",
-	"WX Station": "\u2600",
-	"Red Dot":    "\u00B7",
-	"HF Gateway": "\u24BC",
-	"Ambulance":  "\u2620",
-}
+var symbolGlyphs = map[string]string{}
 
 func init() {
 	primarySymbolMap = map[byte]string{}
@@ -138,13 +130,21 @@ func init() {
 			}
 			break
 		}
-		parts := strings.Split(l, ",")
-		if len(parts) == 7 {
+		l = strings.TrimSpace(l)
+		if len(l) < 3 {
+			continue
+		}
+		parts := strings.Split(l[2:], ",")
+		if len(parts) >= 6 {
 			for i, p := range parts {
 				parts[i] = strings.TrimSpace(p)
 			}
-			primarySymbolMap[parts[0][0]] = parts[3]
-			alternateSymbolMap[parts[0][0]] = parts[6]
+			if len(parts) > 7 {
+				symbolGlyphs[parts[2]] = parts[6]
+				symbolGlyphs[parts[5]] = parts[7]
+			}
+			primarySymbolMap[l[0]] = parts[2]
+			alternateSymbolMap[l[0]] = parts[5]
 		}
 	}
 }
