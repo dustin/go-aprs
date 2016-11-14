@@ -162,6 +162,9 @@ func notify(b broadcast.Broadcaster) {
 		for _, n := range notifiers {
 			if n.To == msg.Dest.Call || (m.Parsed && m.Recipient.Call == n.To && !m.IsACK()) {
 				go n.notify(note)
+			} else if m.IsBulletin() && n.To == "BLN" {
+				note.Msg = fmt.Sprintf("BLN: %s", msg.Body)
+				go n.notify(note)
 			}
 		}
 	}
