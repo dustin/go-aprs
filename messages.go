@@ -48,9 +48,17 @@ func (m Message) String() string {
 		m.Body, idstring)
 }
 
-var ackPattern = regexp.MustCompile(`^ack([A-z0-9]{1,5})`)
+var (
+	ackPattern = regexp.MustCompile(`^ack([A-z0-9]{1,5})`)
+	blnPattern = regexp.MustCompile(`^:BLN[0-9]     :(.*)`)
+)
 
 // IsACK returns true if this message is an acknowledgment to another message.
 func (m Message) IsACK() bool {
 	return ackPattern.MatchString(m.Body)
+}
+
+// IsBulletin returns true if the message represents a bulletin.
+func (m Message) IsBulletin() bool {
+	return blnPattern.MatchString(m.String())
 }

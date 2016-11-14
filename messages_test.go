@@ -8,6 +8,7 @@ const (
 	MESSAGE  = "KG6HWF-9>APDR12,TCPIP*,qAC,T2SPAIN2::KG6HWF   :testing notifications{10"
 	MESSAGE2 = "K7FED-10>APJI23,WR6ABD*:}KG6HWE>APOA00,TCPIP,K7FED-10*::KG6HWF   :yo{AB}07"
 	ACKED    = "KG6HWF-5>APDR13,TCPIP*,qAC,T2PERTH::KG6HWF   :ack01}1"
+	BULLETIN = "W6ELA-7>APK003,WIDE1-1,WIDE2-1,qAR,KW0RCA-2::BLN1     :packet net at 8pm on 145.050. w6ela hears klprc3"
 )
 
 func TestMessage(t *testing.T) {
@@ -69,6 +70,13 @@ func TestThirdParty(t *testing.T) {
 	}
 	if msg.ID != "AB}07" {
 		t.Fatalf("Expected msg id AB}07, got %v", msg.ID)
+	}
+}
+
+func TestBulletin(t *testing.T) {
+	v := ParseFrame(BULLETIN)
+	if !v.Message().IsBulletin() {
+		t.Fatalf("This should be a bulletin: %#v", v.Body)
 	}
 }
 
