@@ -948,8 +948,7 @@
          "type" : "location",
          "srccallsign" : "OH2RDP-1",
          "header" : "OH2RDP-1>BEACON-15,WIDE2-1,qAo,OH2MQK-1"
-      },
-       "misunderstood": false
+      }
    },
    {
       "src" : "OH2RDU>UIDIGI: UIDIGI 1.9",

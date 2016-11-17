@@ -190,6 +190,10 @@ func negAssertLatLon(t *testing.T, pos Position, doc SampleDoc) {
 	}
 }
 
+func assertWX(t *testing.T, body Info, want interface{}) {
+	t.Logf("Looking for wx data from %v, want %v", body, want)
+}
+
 func TestFAP(t *testing.T) {
 	expSuccess := 29
 
@@ -228,8 +232,10 @@ func TestFAP(t *testing.T) {
 					assertLatLon(t, pos, sample)
 					positions++
 				}
+				if wx, ok := sample.Result["wx"]; ok {
+					assertWX(t, v.Body, wx)
+				}
 			}
-
 		}
 	}
 
