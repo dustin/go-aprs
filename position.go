@@ -160,12 +160,13 @@ func uncompressedParser(input string) (pos Position, err error) {
 	return
 }
 
-func positionUncompressed(input string) (pos Position, err error) {
+func positionUncompressed(input string) (Position, error) {
 	found := uncompressedPositionRegexp.FindAllStringSubmatch(input, 10)
 	// {"=3722.1 N/12159.1 W-", "=", "37", "22", "1 ", "N", "/", "121", "59", "1 ", "W", "-", ""}
 	if len(found) == 0 || len(found[0]) != 13 {
-		return pos, ErrNoPosition
+		return Position{}, ErrNoPosition
 	}
+	pos := Position{}
 	pos.Symbol.Table = found[0][6][0]
 	pos.Symbol.Symbol = found[0][11][0]
 	nums := []float64{0, 0, 0, 0}
@@ -237,7 +238,7 @@ func positionUncompressed(input string) (pos Position, err error) {
 		pos.Velocity.Speed *= 1.852
 	}
 
-	return
+	return pos, nil
 }
 
 func decodeBase91(s []byte) int {
@@ -248,18 +249,20 @@ func decodeBase91(s []byte) int {
 		(int(s[2]-33) * 91) + int(s[3]) - 33
 }
 
-func positionCompressed(input string) (pos Position, err error) {
+func positionCompressed(input string) (Position, error) {
 	found := compressedPositionRegexp.FindAllStringSubmatch(input, 10)
 	// {"/]\"4-}Foo !w6", "/", "]\"4-", "}Foo", " ", "!w", "6"}}
 	if len(found) == 0 || len(found[0]) != 7 {
-		return pos, ErrNoPosition
+		return Position{}, ErrNoPosition
 	}
 
 	// Lat = 90 - ((y1-33) x 91^3 + (y2-33) x 91^2 + (y3-33) x 91 + y4-33) / 380926
 	// Long = -180 + ((x1-33) x 91^3 + (x2-33) x 91^2 + (x3-33) x 91 + x4-33) / 190463
 
-	pos.Lat = 90 - float64(decodeBase91([]byte(found[0][2])))/380926
-	pos.Lon = -180 + float64(decodeBase91([]byte(found[0][3])))/190463
+	pos := Position{
+		Lat: 90 - float64(decodeBase91([]byte(found[0][2])))/380926,
+		Lon: -180 + float64(decodeBase91([]byte(found[0][3])))/190463,
+	}
 
 	cs := found[0][5]
 	if cs[0] != ' ' && cs[1] != ' ' && int(cs[0]) >= '!' && int(cs[0]) <= 'z' {
@@ -274,19 +277,19 @@ func positionCompressed(input string) (pos Position, err error) {
 	return pos, nil
 }
 
-func positionOld(t string) (pos Position, err error) {
-	pos, err = positionUncompressed(t)
+func positionOld(t string) (Position, error) {
+	pos, err := positionUncompressed(t)
 	if err == nil {
-		return
+		return pos, err
 	}
-	pos, err = positionCompressed(t)
-	return
+	return positionCompressed(t)
 }
 
-func compressedParser(input string) (pos Position, err error) {
+func compressedParser(input string) (Position, error) {
 	if len(input) < 12 {
-		return pos, ErrTruncatedMsg
+		return Position{}, ErrTruncatedMsg
 	}
+	pos := Position{}
 	pos.Symbol.Table = input[0]
 	pos.Symbol.Symbol = input[9]
 	pos.Lat = 90 - float64(decodeBase91([]byte(input[1:5])))/380926
@@ -298,20 +301,18 @@ func compressedParser(input string) (pos Position, err error) {
 		}
 		pos.Velocity.Speed = 1.852 * (math.Pow(1.08, float64(input[11]-33)) - 1)
 	}
-	return
+	return pos, nil
 }
 
-func newParser(input string, uncompressed bool) (pos Position, err error) {
+func newParser(input string, uncompressed bool) (Position, error) {
 	if uncompressed {
-		pos, err = uncompressedParser(input)
-	} else {
-		pos, err = compressedParser(input)
+		return uncompressedParser(input)
 	}
-	return
+	return compressedParser(input)
 }
 
 // Position gets the position of the message.
-func (body Info) Position() (pos Position, err error) {
+func (body Info) Position() (Position, error) {
 	switch body.Type() {
 	case '!', '=':
 		t := string(body)
@@ -322,7 +323,7 @@ func (body Info) Position() (pos Position, err error) {
 	case ';':
 		t := string(body)
 		if len(t) < 19 {
-			return pos, ErrTruncatedMsg
+			return Position{}, ErrTruncatedMsg
 		}
 		return newParser(t[18:], unicode.IsDigit(rune(body[18])))
 		// t := string(body[1:])

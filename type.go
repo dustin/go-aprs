@@ -44,11 +44,9 @@ func (p PacketType) IsThirdParty() bool {
 	return p == '}'
 }
 
-func (p PacketType) String() (rv string) {
+func (p PacketType) String() string {
 	if t, ok := packetTypeNames[byte(p)]; ok {
-		rv = t
-	} else {
-		rv = fmt.Sprintf("Unknown %x", byte(p))
+		return t
 	}
-	return
+	return fmt.Sprintf("Unknown %x", byte(p))
 }

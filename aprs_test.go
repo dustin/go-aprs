@@ -79,8 +79,7 @@ func TestCallPass(t *testing.T) {
 
 	for _, c := range testaddrs {
 		if c.Call.CallPass() != c.Exp {
-			t.Fatalf("Expected %v for %v, got %v",
-				c.Exp, c.Call, c.Call.CallPass())
+			t.Errorf("Expected %v for %v, got %v", c.Exp, c.Call, c.Call.CallPass())
 		}
 	}
 }

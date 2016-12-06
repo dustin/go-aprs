@@ -22,19 +22,18 @@ func (a Address) String() string {
 }
 
 // CallPass algorithm for APRS-IS
-func (a Address) CallPass() (rv int16) {
-	rv = 0x73e2
+func (a Address) CallPass() int16 {
+	rv := int16(0x73e2)
 	for i := 0; i < len(a.Call); {
 		rv ^= int16(a.Call[i]) << 8
 		rv ^= int16(a.Call[i+1])
 		i += 2
 	}
-	rv &= 0x7fff
-	return
+	return rv & 0x7fff
 }
 
 func parseAddresses(addrs []string) []Address {
-	rv := []Address{}
+	var rv []Address
 
 	for _, s := range addrs {
 		rv = append(rv, AddressFromString(s))

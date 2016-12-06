@@ -16,15 +16,16 @@ type Message struct {
 }
 
 // Message returns the message from an Frame frame.
-func (a Frame) Message() (rv Message) {
+func (a Frame) Message() Message {
 	// Find source of third party
 	for a.Body.Type().IsThirdParty() && len(a.Body) > 11 {
 		a = ParseFrame(string(a.Body[1:]))
 	}
 
+	rv := Message{}
 	if a.Body.Type().IsMessage() {
 		if len(a.Body) < 12 {
-			return
+			return rv
 		}
 		rv.Sender = a.Source
 		rv.Recipient = AddressFromString(strings.TrimSpace(string(a.Body[1:10])))
@@ -36,7 +37,7 @@ func (a Frame) Message() (rv Message) {
 
 		rv.Parsed = true
 	}
-	return
+	return rv
 }
 
 func (m Message) String() string {
