@@ -16,26 +16,25 @@ func init() {
 	http.HandleFunc("/", sendMessage)
 }
 
-func sendMessage(rw http.ResponseWriter, r *http.Request) {
+func sendMessage(w http.ResponseWriter, r *http.Request) {
 	src := r.FormValue("src")
 	dest := r.FormValue("dest")
 	text := r.FormValue("msg")
 	if radio == nil {
-		fmt.Fprintf(rw, "No radio")
+		http.Error(w, "No radio", 500)
 		return
 	}
 
 	if text != "" {
 		d := hex.Dumper(os.Stdout)
 		defer d.Close()
-		w := io.MultiWriter(d, radio)
+		mw := io.MultiWriter(d, radio)
 
-		n, err := w.Write([]byte{0xc0, 0x00})
+		n, err := mw.Write([]byte{0xc0, 0x00})
 		if err != nil {
-			log.Fatal(err)
-		}
-		if n != 2 {
-			log.Fatalf("Expected to write two bytes, wrote %v", n)
+			http.Error(w, err.Error(), 500)
+			log.Printf("Error writing command: %v", err)
+			return
 		}
 
 		msg := aprs.Frame{
@@ -47,24 +46,22 @@ func sendMessage(rw http.ResponseWriter, r *http.Request) {
 		}
 
 		body := ax25.EncodeAPRSCommand(msg)
-		n, err = w.Write(body)
+		n, err = mw.Write(body)
 		if err != nil {
-			log.Fatal(err)
-		}
-		if n != len(body) {
-			log.Fatalf("Expected to write %v bytes, wrote %v", len(body), n)
+			http.Error(w, err.Error(), 500)
+			log.Printf("Error writing command: %v", err)
+			return
 		}
 
-		n, err = w.Write([]byte{0xc0})
+		n, err = mw.Write([]byte{0xc0})
 		if err != nil {
-			log.Fatal(err)
-		}
-		if n != 1 {
-			log.Fatalf("Expected to write 1 byte, wrote %v", n)
+			http.Error(w, err.Error(), 500)
+			log.Printf("Error finishing command: %v", err)
+			return
 		}
 
-		fmt.Fprintf(rw, "Message sent")
+		fmt.Fprintf(w, "Message sent")
 	} else {
-		fmt.Fprintf(rw, "No message")
+		http.Error(w, "No message", 400)
 	}
 }
