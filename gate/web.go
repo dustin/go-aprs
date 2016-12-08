@@ -30,7 +30,7 @@ func sendMessage(w http.ResponseWriter, r *http.Request) {
 		defer d.Close()
 		mw := io.MultiWriter(d, radio)
 
-		n, err := mw.Write([]byte{0xc0, 0x00})
+		_, err := mw.Write([]byte{0xc0, 0x00})
 		if err != nil {
 			http.Error(w, err.Error(), 500)
 			log.Printf("Error writing command: %v", err)
@@ -46,14 +46,14 @@ func sendMessage(w http.ResponseWriter, r *http.Request) {
 		}
 
 		body := ax25.EncodeAPRSCommand(msg)
-		n, err = mw.Write(body)
+		_, err = mw.Write(body)
 		if err != nil {
 			http.Error(w, err.Error(), 500)
 			log.Printf("Error writing command: %v", err)
 			return
 		}
 
-		n, err = mw.Write([]byte{0xc0})
+		_, err = mw.Write([]byte{0xc0})
 		if err != nil {
 			http.Error(w, err.Error(), 500)
 			log.Printf("Error finishing command: %v", err)

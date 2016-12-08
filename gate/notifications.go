@@ -41,7 +41,7 @@ var notifyFuns = map[string]notifyFun{
 	"nma":     notifyMyAndroid,
 }
 
-func notifyMyAndroid(n notifier, note notification) (err error) {
+func notifyMyAndroid(n notifier, note notification) error {
 	notifier := nma.New(n.Config["apikey"])
 
 	i, err := strconv.Atoi(n.Config["priority"])
@@ -59,7 +59,7 @@ func notifyMyAndroid(n notifier, note notification) (err error) {
 	return notifier.Notify(&msg)
 }
 
-func notifyProwl(n notifier, note notification) (err error) {
+func notifyProwl(n notifier, note notification) error {
 	p := goprowl.Goprowl{}
 	p.RegisterKey(n.Config["apikey"])
 
@@ -73,10 +73,10 @@ func notifyProwl(n notifier, note notification) (err error) {
 	return p.Push(&msg)
 }
 
-func notifyWebhook(n notifier, note notification) (err error) {
+func notifyWebhook(n notifier, note notification) error {
 	data, err := json.Marshal(note)
 	if err != nil {
-		return
+		return err
 	}
 
 	r, err := http.Post(n.Config["url"], "application/json",
@@ -87,7 +87,7 @@ func notifyWebhook(n notifier, note notification) (err error) {
 			err = errors.New(r.Status)
 		}
 	}
-	return
+	return err
 }
 
 func (n notifier) notify(note notification) {
