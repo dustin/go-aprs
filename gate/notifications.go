@@ -61,7 +61,9 @@ func notifyMyAndroid(n notifier, note notification) error {
 
 func notifyProwl(n notifier, note notification) error {
 	p := goprowl.Goprowl{}
-	p.RegisterKey(n.Config["apikey"])
+	if err := p.RegisterKey(n.Config["apikey"]); err != nil {
+		return err
+	}
 
 	msg := goprowl.Notification{
 		Application: n.Config["application"],

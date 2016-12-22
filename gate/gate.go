@@ -66,7 +66,9 @@ func netClient(b broadcast.Broadcaster) error {
 		return err
 	}
 
-	is.Auth(*call, *pass, *filter)
+	if err := is.Auth(*call, *pass, *filter); err != nil {
+		return err
+	}
 
 	if *rawlog != "" {
 		logWriter, err := os.OpenFile(*rawlog,
@@ -79,7 +81,7 @@ func netClient(b broadcast.Broadcaster) error {
 
 	is.SetInfoHandler(&loggingInfoHandler{})
 
-	wd := time.AfterFunc(*wdTime, func() { is.Close() })
+	wd := time.AfterFunc(*wdTime, func() { _ = is.Close() })
 	for {
 		msg, err := is.Next()
 		if err != nil {
