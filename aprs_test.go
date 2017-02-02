@@ -50,8 +50,10 @@ func TestAddressConversion(t *testing.T) {
 		Src string
 		Exp Address
 	}{
-		{"KG6HWF", Address{"KG6HWF", 0}},
-		{"KG6HWF-9", Address{"KG6HWF", 9}},
+		{"KG6HWF", Address{"KG6HWF", ""}},
+		{"KG6HWF-9", Address{"KG6HWF", "9"}},
+		{"KG6HWF-C", Address{"KG6HWF", "C"}},
+		{"KG6HWF-FLY", Address{"KG6HWF", "FLY"}},
 	}
 
 	for _, ta := range testaddrs {
