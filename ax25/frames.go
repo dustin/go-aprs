@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"strconv"
 	"strings"
 
 	"github.com/dustin/go-aprs"
@@ -26,7 +27,7 @@ func parseAddr(in []byte) aprs.Address {
 	}
 	rv := aprs.Address{
 		Call: strings.TrimSpace(string(out[:len(out)-1])),
-		SSID: uint8((out[len(out)-1]) & 0xf),
+		SSID: strconv.Itoa(int((out[len(out)-1]) & 0xf)),
 	}
 	return rv
 }
@@ -91,7 +92,11 @@ func addressEncode(a aprs.Address, ssidMask byte) []byte {
 	for i, c := range a.Call {
 		rv[i] = byte(c) << 1
 	}
-	rv[6] = ssidMask | (byte(a.SSID) << 1)
+	i, err := strconv.Atoi(a.SSID)
+	if err != nil {
+		i = 0
+	}
+	rv[6] = ssidMask | (byte(i) << 1)
 	return rv
 }
 
