@@ -2,21 +2,20 @@ package aprs
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 )
 
 // An Address for APRS (callsign with optional SSID)
 type Address struct {
 	Call string
-	SSID uint8
+	SSID string
 }
 
 // The string representation of an address.
 func (a Address) String() string {
 	rv := a.Call
-	if a.SSID != 0 {
-		rv = fmt.Sprintf("%s-%d", a.Call, a.SSID)
+	if a.SSID != "" {
+		rv = fmt.Sprintf("%s-%s", a.Call, a.SSID)
 	}
 	return rv
 }
@@ -47,10 +46,7 @@ func AddressFromString(s string) Address {
 	parts := strings.Split(s, "-")
 	rv := Address{Call: parts[0]}
 	if len(parts) > 1 {
-		x, err := strconv.ParseInt(parts[1], 10, 32)
-		if err == nil {
-			rv.SSID = uint8(x)
-		}
+		rv.SSID = parts[1]
 	}
 	return rv
 }
