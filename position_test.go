@@ -7,7 +7,7 @@ func TestSymbol(t *testing.T) {
 		in Symbol
 		s  string
 	}{
-		{Symbol{'/', '\''}, `{/': Plane sm}`},
+		{Symbol{'/', '\''}, `{/': Plane sm - ✈}`},
 		{Symbol{'\\', '\''}, `{\': Crash site}`},
 		{Symbol{'/', 'a'}, "{/a: Ambulance - \u2620}"},
 	}
