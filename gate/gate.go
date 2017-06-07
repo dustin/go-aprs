@@ -10,6 +10,8 @@ import (
 	"log/syslog"
 	"net/http"
 	"os"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/dustin/go-aprs"
@@ -55,7 +57,16 @@ func reporter(b broadcast.Broadcaster) {
 
 type loggingInfoHandler struct{}
 
+var annoyinglog sync.Once
+
 func (*loggingInfoHandler) Info(msg string) {
+	// Ignore this annoying repetitive message
+	if strings.HasPrefix(msg, "# aprsc") {
+		annoyinglog.Do(func() {
+			log.Printf("info: %s", msg)
+		})
+		return
+	}
 	log.Printf("info: %s", msg)
 
 }
