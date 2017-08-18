@@ -77,6 +77,7 @@ func TestCallPass(t *testing.T) {
 		{AddressFromString("KG6HWF-9"), 22955},
 		{AddressFromString("KG6HWF"), 22955},
 		{AddressFromString("KE6AFE-13"), 18595},
+		{AddressFromString("K6MGD"), 12691},
 	}
 
 	for _, c := range testaddrs {

@@ -25,7 +25,9 @@ func (a Address) CallPass() int16 {
 	rv := int16(0x73e2)
 	for i := 0; i < len(a.Call); {
 		rv ^= int16(a.Call[i]) << 8
-		rv ^= int16(a.Call[i+1])
+		if i+1 < len(a.Call) {
+			rv ^= int16(a.Call[i+1])
+		}
 		i += 2
 	}
 	return rv & 0x7fff
