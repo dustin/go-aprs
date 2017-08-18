@@ -246,7 +246,7 @@ func decodeBase91(s []byte) int {
 		return 0
 	}
 	return ((int(s[0]) - 33) * 91 * 91 * 91) + ((int(s[1]) - 33) * 91 * 91) +
-		(int(s[2]-33) * 91) + int(s[3]) - 33
+		((int(s[2]) - 33) * 91) + int(s[3]) - 33
 }
 
 func positionCompressed(input string) (Position, error) {
