@@ -89,7 +89,7 @@ func (a *APRSIS) Close() error {
 
 // Send raw APRS packet using underlying textproto conn.
 func (a *APRSIS) SendRawPacket(format string, args ...interface{}) error {
-	return a.conn.PrintfLine(format, args)
+	return a.conn.PrintfLine(format, args...)
 }
 
 // Auth authenticates and optionally set a filter.
