@@ -87,12 +87,20 @@ func (a *APRSIS) Close() error {
 	return a.conn.Close()
 }
 
+// Send raw APRS packet using underlying textproto conn.
+func (a *APRSIS) SendRawPacket(format string, args ...interface{}) error {
+	return a.conn.PrintfLine(format, args)
+}
+
 // Auth authenticates and optionally set a filter.
 func (a *APRSIS) Auth(user, pass, filter string) error {
 	if filter != "" {
 		filter = fmt.Sprintf(" filter %s", filter)
 	}
 
-	return a.conn.PrintfLine("user %s pass %s vers goaprs 0.1%s",
+	return a.SendRawPacket("user %s pass %s vers goaprs 0.1%s",
 		user, pass, filter)
 }
+
+
+
