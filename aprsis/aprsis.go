@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/textproto"
 
 	"github.com/dustin/go-aprs"
@@ -16,9 +17,10 @@ var errInvalidMsg = errors.New("invalid message")
 
 // An APRSIS connection.
 type APRSIS struct {
-	conn        *textproto.Conn
-	rawLog      io.Writer
-	infoHandler InfoHandler
+	incomingMessages chan aprs.Frame
+	conn             *textproto.Conn
+	rawLog           io.Writer
+	infoHandler      InfoHandler
 }
 
 // InfoHandler is a handler for incoming info messages.
@@ -68,18 +70,21 @@ func (a *APRSIS) SetInfoHandler(to InfoHandler) {
 	a.infoHandler = to
 }
 
-// Dial an APRS-IS service.
-func Dial(prot, addr string) (rv *APRSIS, err error) {
-	var conn *textproto.Conn
-	conn, err = textproto.Dial(prot, addr)
-	if err != nil {
-		return
+// ManageConnection - Goroutine that receives APRS stream and sends it to bound channel
+func (a *APRSIS) ManageConnection() {
+	for {
+		frame, err := a.Next()
+		if err != nil {
+			log.Println(err)
+			break
+		}
+		a.incomingMessages <- frame
 	}
+}
 
-	return &APRSIS{conn: conn,
-		rawLog:      ioutil.Discard,
-		infoHandler: dumbInfoHandler,
-	}, nil
+// GetIncomingMessages - bound method for use with loops
+func (a *APRSIS) GetIncomingMessages() <-chan aprs.Frame {
+	return a.incomingMessages
 }
 
 // Close disconnects from the underlying textproto conn.
@@ -102,5 +107,40 @@ func (a *APRSIS) Auth(user, pass, filter string) error {
 		user, pass, filter)
 }
 
+// Dial an APRS-IS service.
+func Dial(prot, addr string) (rv *APRSIS, err error) {
+	var conn *textproto.Conn
+	conn, err = textproto.Dial(prot, addr)
+	if err != nil {
+		return
+	}
 
+	return &APRSIS{conn: conn,
+		rawLog:           ioutil.Discard,
+		infoHandler:      dumbInfoHandler,
+		incomingMessages: make(chan aprs.Frame),
+	}, nil
+}
 
+// Configure APRS TCP Connector
+func APRSTCPConnector(user, pass, filter, server string) (client *APRSIS, err error) {
+	client, err = Dial("tcp", server)
+	if err != nil {
+		return nil, err
+	}
+	err = client.Auth(user, pass, filter)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+// Return Read-Write APRS client
+func NewAPRS(user, pass, filter string) (client *APRSIS, err error) {
+	return APRSTCPConnector(user, pass, filter, "rotate.aprs2.net:14580")
+}
+
+// Return Read-Only APRS client
+func NewROAPRS() (client *APRSIS, err error) {
+	return APRSTCPConnector("N0CALL", "-1", "", "rotate.aprs.net:10152")
+}
