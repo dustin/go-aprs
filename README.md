@@ -41,7 +41,7 @@ func main() {
     go client.ManageConnection()
 
     for frame := range client.GetIncomingMessages() {
-        fmt.Println(frame.Source.Call, frame.Dest.Call, frame.Body.Type().String())
+        fmt.Println(frame.Source.Call, frame.Dest.Call, frame.Body.Type())
     }
 }
 ```
@@ -50,6 +50,7 @@ func main() {
 
 Please replace `CALLSIGN-4` with your callsign and `12345` with your passcode.
 `r/10.5/10.5/500` is APRS filter expression: latitude, longitude, radius (km).
+Body structure contains latitude, longitude and symbol used to create APRS frame.
 
 
 ```go
@@ -71,9 +72,27 @@ func main() {
 
     defer client.Close()
 
-    packet := "CALLSIGN-4>APZU5,TCPIP*,qAC,T2PARIS:=1030.28N/01030.20E-"
+    body := aprs.Body{
+        Lat: 1030.28,
+        Lon: 1030.2,
+        Symbol: "-",
+    }
 
-    err = client.SendRawPacket(packet)
+    frame := aprs.Frame{
+        Source: aprs.Address{
+            Call: "CALLSIGN",
+            SSID: "4",
+        },
+        Dest: aprs.Address{
+            Call: "APZU5",
+        },
+        Path: []aprs.Address{
+            {Call: "TCPIP*"}, {Call: "qAC"}, {Call: "T2PARIS"},
+        },
+        Body: body.Info(),
+    }
+
+    err = client.SendPacket(frame)
     if err != nil {
         log.Fatalf("Send %+v\n", err)
     }
@@ -81,7 +100,8 @@ func main() {
     go client.ManageConnection()
 
     for frame := range client.GetIncomingMessages() {
-        fmt.Println(frame.Source.Call, frame.Dest.Call, frame.Body.Type().String())
+        fmt.Println(frame.Source.Call, frame.Dest.Call, frame.Body.Type())
     }
 }
+
 ```

@@ -97,6 +97,11 @@ func (a *APRSIS) SendRawPacket(format string, args ...interface{}) error {
 	return a.conn.PrintfLine(format, args...)
 }
 
+// Send APRS frame
+func (a *APRSIS) SendPacket(packet aprs.Frame) error {
+	return a.SendRawPacket(packet.String())
+}
+
 // Auth authenticates and optionally set a filter.
 func (a *APRSIS) Auth(user, pass, filter string) error {
 	if filter != "" {
