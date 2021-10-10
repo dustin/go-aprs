@@ -1,6 +1,9 @@
 package aprs
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestSymbol(t *testing.T) {
 	tests := []struct {
@@ -58,5 +61,24 @@ func TestPositionParsing(t *testing.T) {
 	if err == nil {
 		t.Errorf("Expected error on three bytes uncompressed, got %v", x)
 	}
+}
 
+func TestInvalidPosition(t *testing.T) {
+	testBodies := []string{
+		"@",
+		"@1234568",
+		"!",
+		"!1",
+		";",
+		";123456789012345678",
+	}
+	for i, testFrame := range testBodies {
+		t.Run(fmt.Sprintf("InvalidPosition[%d]", i), func(t *testing.T) {
+			parsedFrame := ParseFrame("SOURCE>DESTINATION,PATH:" + testFrame)
+			_, err := parsedFrame.Body.Position()
+			if err == nil {
+				t.Fatalf("Parsing %q: expecting any error, go not error", testFrame)
+			}
+		})
+	}
 }
