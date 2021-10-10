@@ -316,8 +316,14 @@ func (body Info) Position() (Position, error) {
 	switch body.Type() {
 	case '!', '=':
 		t := string(body)
+		if len(body) < 2 {
+			return Position{}, ErrTruncatedMsg
+		}
 		return newParser(t[1:], unicode.IsDigit(rune(t[1])))
 	case '/', '@':
+		if len(body) < 9 {
+			return Position{}, ErrTruncatedMsg
+		}
 		t := string(body[8:])
 		return newParser(t, unicode.IsDigit(rune(body[8])))
 	case ';':
